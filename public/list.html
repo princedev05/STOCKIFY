@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List Stock - Stock Market Simulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .company-info {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .company-info.show {
+            display: block;
+        }
+
+        .company-info h3 {
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .company-info p {
+            color: #666;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="email"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+            border: 1px solid #c3e6cb;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+            border: 1px solid #f5c6cb;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            margin-top: 10px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .navigation {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .navigation a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+            margin: 0 10px;
+        }
+
+        .navigation a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>List Your Stock</h1>
+            <p>Add your company's stock to the market</p>
+        </div>
+
+        <div class="success-message" id="successMessage"></div>
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="company-info" id="companyInfo">
+            <h3>Company Information</h3>
+            <p id="companyName"></p>
+            <p id="companySector"></p>
+        </div>
+
+        <form id="listStockForm">
+            <!-- Stock Price -->
+            <div class="form-group">
+                <label for="currentPrice">Stock Price (per share) *</label>
+                <input 
+                    type="number" 
+                    id="currentPrice" 
+                    name="current_price" 
+                    placeholder="Enter stock price"
+                    step="0.01"
+                    min="0"
+                    required
+                >
+                <div class="help-text">The initial trading price for your stock</div>
+            </div>
+
+            <!-- Total Shares -->
+            <div class="form-group">
+                <label for="totalShares">Total Shares to Issue *</label>
+                <input 
+                    type="number" 
+                    id="totalShares" 
+                    name="total_shares" 
+                    placeholder="Enter total number of shares"
+                    min="1"
+                    required
+                >
+                <div class="help-text">Total number of shares you want to issue</div>
+            </div>
+
+            <!-- Available Shares -->
+            <div class="form-group">
+                <label for="availableShares">Available Shares for Trading *</label>
+                <input 
+                    type="number" 
+                    id="availableShares" 
+                    name="available_shares" 
+                    placeholder="Enter available shares for trading"
+                    min="1"
+                    required
+                >
+                <div class="help-text">Number of shares available for investors to buy</div>
+            </div>
+
+            <!-- Lot Size -->
+            <div class="form-group">
+                <label for="lotSize">Lot Size</label>
+                <input 
+                    type="number" 
+                    id="lotSize" 
+                    name="lot_size" 
+                    placeholder="Enter lot size"
+                    value="1"
+                    min="1"
+                >
+                <div class="help-text">Minimum shares per transaction (default: 1)</div>
+            </div>
+
+            <div class="loading" id="loading">
+                <span>Processing... Please wait</span>
+            </div>
+
+            <button type="submit">List Stock</button>
+
+            <div class="navigation">
+                <a href="dashboard.html">← Back to Dashboard</a>
+                <a href="/">Home</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const JWT_SECRET = 'devsecret'; // Should match server's JWT_SECRET
+
+        // Get token from localStorage
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+
+        // Check if user is authenticated and is a company
+        async function checkAuthentication() {
+            const token = getToken();
+            if (!token) {
+                alert('Please login first');
+                window.location.href = 'login.html';
+                return false;
+            }
+            
+            try {
+                const response = await fetch('/company/info', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.status === 401) {
+                    alert('Session expired. Please login again');
+                    localStorage.removeItem('token');
+                    window.location.href = 'login.html';
+                    return false;
+                }
+
+                if (!response.ok) {
+                    throw new Error('Not authorized or not a company');
+                }
+
+                const company = await response.json();
+                
+                // Display company info
+                const companyInfo = document.getElementById('companyInfo');
+                document.getElementById('companyName').textContent = `Name: ${company.company_name}`;
+                document.getElementById('companySector').textContent = `Sector: ${company.sector || 'Not specified'}`;
+                companyInfo.classList.add('show');
+
+                return true;
+            } catch (err) {
+                console.error('Auth check failed:', err);
+                alert('Error: ' + err.message);
+                window.location.href = 'login.html';
+                return false;
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('listStockForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const token = getToken();
+            if (!token) {
+                showError('Please login first');
+                return;
+            }
+
+            // Validate form
+            const currentPrice = parseFloat(document.getElementById('currentPrice').value);
+            const totalShares = parseInt(document.getElementById('totalShares').value);
+            const availableShares = parseInt(document.getElementById('availableShares').value);
+            const lotSize = parseInt(document.getElementById('lotSize').value) || 1;
+
+            if (!currentPrice || currentPrice <= 0) {
+                showError('Please enter a valid stock price');
+                return;
+            }
+
+            if (!totalShares || totalShares <= 0) {
+                showError('Please enter valid total shares');
+                return;
+            }
+
+            if (!availableShares || availableShares <= 0) {
+                showError('Please enter valid available shares');
+                return;
+            }
+
+            if (availableShares > totalShares) {
+                showError('Available shares cannot be greater than total shares');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading').classList.add('show');
+
+            try {
+                const response = await fetch('/company/listStock', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        current_price: currentPrice,
+                        total_shares: totalShares,
+                        available_shares: availableShares,
+                        lot_size: lotSize
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to list stock');
+                }
+
+                // Success
+                showSuccess('Stock listed successfully! Stock ID: ' + data.stock_id);
+                
+                // Reset form
+                document.getElementById('listStockForm').reset();
+                document.getElementById('lotSize').value = '1';
+
+                // Redirect after 2 seconds
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 2000);
+
+            } catch (err) {
+                console.error('Error:', err);
+                showError(err.message);
+            } finally {
+                document.getElementById('loading').classList.remove('show');
+            }
+        });
+
+        // Helper functions
+        function showSuccess(message) {
+            const msg = document.getElementById('successMessage');
+            msg.textContent = message;
+            msg.classList.add('show');
+            document.getElementById('errorMessage').classList.remove('show');
+        }
+
+        function showError(message) {
+            const msg = document.getElementById('errorMessage');
+            msg.textContent = message;
+            msg.classList.add('show');
+            document.getElementById('successMessage').classList.remove('show');
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuthentication();
+        });
+    </script>
+</body>
+</html>

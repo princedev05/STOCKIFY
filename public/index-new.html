@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stock Market Simulation - Home</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+      }
+
+      /* Navbar */
+      nav {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1rem 0;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .nav-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .nav-brand {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: white;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        list-style: none;
+        align-items: center;
+      }
+
+      .nav-links a {
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        transition: opacity 0.3s;
+      }
+
+      .nav-links a:hover {
+        opacity: 0.8;
+      }
+
+      .nav-links .btn-signup {
+        background: white;
+        color: #667eea;
+        padding: 0.6rem 1.5rem;
+        border-radius: 4px;
+        transition: transform 0.3s;
+      }
+
+      .nav-links .btn-signup:hover {
+        transform: translateY(-2px);
+        opacity: 1;
+      }
+
+      .nav-links .btn-login {
+        background: transparent;
+        border: 2px solid white;
+        color: white;
+        padding: 0.6rem 1.5rem;
+        border-radius: 4px;
+        transition: all 0.3s;
+      }
+
+      .nav-links .btn-login:hover {
+        background: white;
+        color: #667eea;
+      }
+
+      /* Hero Section */
+      .hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 100px 20px;
+        text-align: center;
+        min-height: 500px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .hero h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        animation: slideDown 0.8s ease-out;
+      }
+
+      .hero p {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+        animation: slideUp 0.8s ease-out;
+      }
+
+      .hero .btn-group {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .btn-primary {
+        background: white;
+        color: #667eea;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      }
+
+      .btn-secondary {
+        background: transparent;
+        border: 2px solid white;
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        background: white;
+        color: #667eea;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Features Section */
+      .features {
+        max-width: 1200px;
+        margin: 60px auto;
+        padding: 0 20px;
+      }
+
+      .features h2 {
+        text-align: center;
+        font-size: 2rem;
+        margin-bottom: 3rem;
+        color: #333;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+      }
+
+      .feature-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .feature-card h3 {
+        color: #667eea;
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+      }
+
+      .feature-card p {
+        color: #666;
+        line-height: 1.8;
+      }
+
+      /* Footer */
+      footer {
+        background: #333;
+        color: white;
+        text-align: center;
+        padding: 2rem;
+        margin-top: 60px;
+      }
+
+      @media (max-width: 768px) {
+        .nav-links {
+          gap: 1rem;
+        }
+
+        .hero h1 {
+          font-size: 2rem;
+        }
+
+        .hero p {
+          font-size: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav>
+      <div class="nav-container">
+        <a href="/" class="nav-brand"> 📈 Stock Market Sim </a>
+        <ul class="nav-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="blog.html">Blog</a></li>
+          <li><a href="list.html">List Stock</a></li>
+          <li><a href="company-dashboard.html">Company Dashboard</a></li>
+          <li><a href="signup.html" class="btn-signup">Sign Up</a></li>
+          <li><a href="login.html" class="btn-login">Login</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <h1>Welcome to Stock Market Simulation</h1>
+      <p>
+        Trade stocks, build your portfolio, and master the markets in a safe
+        learning environment
+      </p>
+      <div class="btn-group">
+        <a href="signup.html" class="btn btn-primary">Get Started</a>
+        <a href="about.html" class="btn btn-secondary">Learn More</a>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+      <h2>Why Choose Our Platform?</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3>📊 Real-Time Trading</h3>
+          <p>
+            Experience live market simulation with real-time price updates and
+            order matching engine.
+          </p>
+        </div>
+        <div class="feature-card">
+          <h3>💼 Full ACID Compliance</h3>
+          <p>
+            All transactions are guaranteed with database ACID properties and
+            transaction integrity.
+          </p>
+        </div>
+        <div class="feature-card">
+          <h3>📈 Portfolio Management</h3>
+          <p>
+            Track your holdings, view transaction history, and analyze your
+            investment performance.
+          </p>
+        </div>
+        <div class="feature-card">
+          <h3>🔒 Secure Authentication</h3>
+          <p>
+            Your account is protected with bcrypt hashing and JWT token-based
+            authentication.
+          </p>
+        </div>
+        <div class="feature-card">
+          <h3>🎯 Market Orders & Limits</h3>
+          <p>
+            Place market orders for immediate execution or limit orders to set
+            your own prices.
+          </p>
+        </div>
+        <div class="feature-card">
+          <h3>📝 Transaction Ledger</h3>
+          <p>
+            Complete audit trail of all deposits, withdrawals, trades, and
+            portfolio changes.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <p>&copy; 2025 Stock Market Simulation Platform. All rights reserved.</p>
+    </footer>
+  </body>
+</html>

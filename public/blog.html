@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog - Stock Market Simulation</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: #333;
+        background: #f9f9f9;
+      }
+
+      /* Navbar */
+      nav {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1rem 0;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .nav-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .nav-brand {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: white;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        list-style: none;
+        align-items: center;
+      }
+
+      .nav-links a {
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        transition: opacity 0.3s;
+      }
+
+      .nav-links a:hover {
+        opacity: 0.8;
+      }
+
+      .nav-links .btn-signup {
+        background: white;
+        color: #667eea;
+        padding: 0.6rem 1.5rem;
+        border-radius: 4px;
+        transition: transform 0.3s;
+      }
+
+      .nav-links .btn-signup:hover {
+        transform: translateY(-2px);
+      }
+
+      .nav-links .btn-login {
+        background: transparent;
+        border: 2px solid white;
+        color: white;
+        padding: 0.6rem 1.5rem;
+        border-radius: 4px;
+        transition: all 0.3s;
+      }
+
+      .nav-links .btn-login:hover {
+        background: white;
+        color: #667eea;
+      }
+
+      /* Header */
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 60px 20px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .header p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+      }
+
+      /* Main Content */
+      .container {
+        max-width: 1000px;
+        margin: 40px auto;
+        padding: 0 20px;
+      }
+
+      .blog-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+      }
+
+      .blog-card {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+
+      .blog-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      }
+
+      .blog-image {
+        width: 100%;
+        height: 200px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+      }
+
+      .blog-content {
+        padding: 1.5rem;
+      }
+
+      .blog-meta {
+        color: #999;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .blog-title {
+        color: #333;
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+      }
+
+      .blog-excerpt {
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+      }
+
+      .read-more {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: gap 0.3s;
+      }
+
+      .read-more:hover {
+        gap: 1rem;
+      }
+
+      .read-more::after {
+        content: "→";
+      }
+
+      /* Footer */
+      footer {
+        background: #333;
+        color: white;
+        text-align: center;
+        padding: 2rem;
+        margin-top: 60px;
+      }
+
+      @media (max-width: 768px) {
+        .header h1 {
+          font-size: 1.8rem;
+        }
+
+        .blog-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav>
+      <div class="nav-container">
+        <a href="/" class="nav-brand"> 📈 Stock Market Sim </a>
+        <ul class="nav-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="blog.html">Blog</a></li>
+          <li><a href="list.html">List Stock</a></li>
+          <li><a href="signup.html" class="btn-signup">Sign Up</a></li>
+          <li><a href="login.html" class="btn-login">Login</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="header">
+      <h1>Stock Market Blog</h1>
+      <p>Learn trading tips, market insights, and investment strategies</p>
+    </div>
+
+    <!-- Blog Posts -->
+    <div class="container">
+      <div class="blog-grid">
+        <!-- Blog Post 1 -->
+        <div class="blog-card">
+          <div class="blog-image">📊</div>
+          <div class="blog-content">
+            <div class="blog-meta">November 17, 2025 • 5 min read</div>
+            <h3 class="blog-title">Getting Started with Stock Trading</h3>
+            <p class="blog-excerpt">
+              Learn the basics of stock trading, including how to open an
+              account, place your first order, and build a diversified
+              portfolio.
+            </p>
+            <a href="#" class="read-more">Read Article</a>
+          </div>
+        </div>
+
+        <!-- Blog Post 2 -->
+        <div class="blog-card">
+          <div class="blog-image">💹</div>
+          <div class="blog-content">
+            <div class="blog-meta">November 15, 2025 • 7 min read</div>
+            <h3 class="blog-title">
+              Understanding Market Orders vs Limit Orders
+            </h3>
+            <p class="blog-excerpt">
+              Discover the differences between market and limit orders, when to
+              use each, and how they can impact your trading strategy and costs.
+            </p>
+            <a href="#" class="read-more">Read Article</a>
+          </div>
+        </div>
+
+        <!-- Blog Post 3 -->
+        <div class="blog-card">
+          <div class="blog-image">🎯</div>
+          <div class="blog-content">
+            <div class="blog-meta">November 12, 2025 • 6 min read</div>
+            <h3 class="blog-title">Portfolio Diversification Strategies</h3>
+            <p class="blog-excerpt">
+              Learn why diversification matters and how to build a balanced
+              portfolio that spreads risk across different stocks and sectors.
+            </p>
+            <a href="#" class="read-more">Read Article</a>
+          </div>
+        </div>
+
+        <!-- Blog Post 4 -->
+        <div class="blog-card">
+          <div class="blog-image">📈</div>
+          <div class="blog-content">
+            <div class="blog-meta">November 10, 2025 • 8 min read</div>
+            <h3 class="blog-title">Technical Analysis Basics for Beginners</h3>
+            <p class="blog-excerpt">
+              Introduction to technical analysis, chart patterns, and indicators
+              that can help you make better trading decisions.
+            </p>
+            <a href="#" class="read-more">Read Article</a>
+          </div>
+        </div>
+
+        <!-- Blog Post 5 -->
+        <div class="blog-card">
+          <div class="blog-image">🔍</div>
+          <div class="blog-content">
+            <div class="blog-meta">November 8, 2025 • 9 min read</div>
+            <h3 class="blog-title">
+              Fundamental Analysis: Finding Value Stocks
+            </h3>
+            <p class="blog-excerpt">
+              Learn how to analyze company financials, understand key metrics,
+              and identify undervalued stocks using fundamental analysis.
+            </p>
+            <a href="#" class="read-more">Read Article</a>
+          </div>
+        </div>
+
+        <!-- Blog Post 6 -->
+        <div class="blog-card">
+          <div class="blog-image">💰</div>
+          <div class="blog-content">
+            <div class="blog-meta">November 5, 2025 • 10 min read</div>
+            <h3 class="blog-title">Risk Management: Protecting Your Capital</h3>
+            <p class="blog-excerpt">
+              Understand the importance of risk management, learn about
+              stop-loss orders, and discover strategies to protect your trading
+              capital.
+            </p>
+            <a href="#" class="read-more">Read Article</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>&copy; 2025 Stock Market Simulation Platform. All rights reserved.</p>
+    </footer>
+  </body>
+</html>

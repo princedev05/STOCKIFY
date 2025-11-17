@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Stock Market Simulation</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f5f5f5;
+        color: #333;
+      }
+
+      /* Navbar */
+      nav {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .nav-brand {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: white;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .nav-right {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+      }
+
+      .user-info {
+        color: white;
+        font-size: 0.95rem;
+      }
+
+      .user-info strong {
+        display: block;
+      }
+
+      .btn-logout {
+        background: white;
+        color: #667eea;
+        padding: 0.6rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: transform 0.3s;
+      }
+
+      .btn-logout:hover {
+        transform: translateY(-2px);
+      }
+
+      /* Main Container */
+      .container {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0 20px;
+      }
+
+      /* Tabs */
+      .tabs {
+        display: flex;
+        gap: 0;
+        margin-bottom: 0;
+        background: white;
+        border-bottom: 3px solid #667eea;
+        border-radius: 8px 8px 0 0;
+      }
+
+      .tab-button {
+        padding: 1rem 2rem;
+        background: white;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        color: #999;
+        transition: all 0.3s;
+        border-bottom: 3px solid transparent;
+      }
+
+      .tab-button.active {
+        color: #667eea;
+        border-bottom-color: #667eea;
+      }
+
+      .tab-button:hover {
+        color: #667eea;
+      }
+
+      /* Tab Content */
+      .tab-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 0 0 8px 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .tab-pane {
+        display: none;
+      }
+
+      .tab-pane.active {
+        display: block;
+      }
+
+      /* Forms */
+      .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .form-group label {
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+      }
+
+      .form-group input,
+      .form-group select {
+        padding: 0.8rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+      }
+
+      .btn-submit {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.8rem 2rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: transform 0.3s;
+        align-self: flex-start;
+      }
+
+      .btn-submit:hover {
+        transform: translateY(-2px);
+      }
+
+      /* Alert Messages */
+      .alert {
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1.5rem;
+        display: none;
+      }
+
+      .alert.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+        display: block;
+      }
+
+      .alert.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        display: block;
+      }
+
+      /* Tables */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1.5rem;
+      }
+
+      th,
+      td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+      }
+
+      th {
+        background: #f9f9f9;
+        font-weight: 600;
+        color: #667eea;
+      }
+
+      tr:hover {
+        background: #f9f9f9;
+      }
+
+      /* Cards */
+      .info-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+      }
+
+      .info-card h3 {
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+        opacity: 0.9;
+      }
+
+      .info-card .value {
+        font-size: 2rem;
+        font-weight: bold;
+      }
+
+      @media (max-width: 768px) {
+        nav {
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .tabs {
+          flex-wrap: wrap;
+        }
+
+        .tab-button {
+          padding: 0.8rem 1.5rem;
+          font-size: 0.9rem;
+        }
+
+        table {
+          font-size: 0.9rem;
+        }
+
+        th,
+        td {
+          padding: 0.7rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav>
+      <a href="index-new.html" class="nav-brand"> 📈 Stock Market Sim </a>
+      <div class="nav-right">
+        <div class="user-info">
+          <strong>Welcome, <span id="username"></span></strong>
+          <span>User ID: <span id="userid"></span></span>
+        </div>
+        <button class="btn-logout" onclick="logout()">Logout</button>
+      </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-button active" onclick="showTab('portfolio')">
+          📊 Portfolio
+        </button>
+        <button class="tab-button" onclick="showTab('trading')">
+          💱 Trading
+        </button>
+        <button class="tab-button" onclick="showTab('list-stock')">
+          📈 List Stock
+        </button>
+        <button class="tab-button" onclick="showTab('history')">
+          📜 History
+        </button>
+      </div>
+
+      <!-- Tab Content -->
+      <div class="tab-content">
+        <!-- Portfolio Tab -->
+        <div id="portfolio" class="tab-pane active">
+          <h2>Your Portfolio</h2>
+          <div id="portfolio-alert"></div>
+
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+              gap: 1.5rem;
+            "
+          >
+            <div class="info-card">
+              <h3>Total Balance</h3>
+              <div class="value">₹<span id="total-balance">0</span></div>
+            </div>
+            <div class="info-card">
+              <h3>Locked Amount</h3>
+              <div class="value">₹<span id="locked-amount">0</span></div>
+            </div>
+            <div class="info-card">
+              <h3>Holdings</h3>
+              <div class="value"><span id="total-holdings">0</span></div>
+            </div>
+          </div>
+
+          <h3 style="margin-top: 2rem; margin-bottom: 1rem">Your Holdings</h3>
+          <div id="holdings-table"></div>
+        </div>
+
+        <!-- Trading Tab -->
+        <div id="trading" class="tab-pane">
+          <h2>Trade Stocks</h2>
+          <div id="trading-alert"></div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem">
+            <!-- Buy Section -->
+            <div>
+              <h3>Buy Stock</h3>
+              <form id="buy-form" onsubmit="handleBuy(event)">
+                <div class="form-group" style="margin-bottom: 1rem">
+                  <label>Stock ID</label>
+                  <input type="number" id="buy-stock-id" required />
+                </div>
+                <div class="form-group" style="margin-bottom: 1rem">
+                  <label>Quantity</label>
+                  <input type="number" id="buy-quantity" min="1" required />
+                </div>
+                <div class="form-group" style="margin-bottom: 1rem">
+                  <label>Order Type</label>
+                  <select id="buy-order-type" onchange="toggleBuyLimit()">
+                    <option value="MARKET">Market</option>
+                    <option value="LIMIT">Limit</option>
+                  </select>
+                </div>
+                <div
+                  class="form-group"
+                  style="margin-bottom: 1rem; display: none"
+                  id="buy-limit-group"
+                >
+                  <label>Limit Price (₹)</label>
+                  <input type="number" id="buy-limit-price" step="0.01" />
+                </div>
+                <button type="submit" class="btn-submit">
+                  Place Buy Order
+                </button>
+              </form>
+            </div>
+
+            <!-- Sell Section -->
+            <div>
+              <h3>Sell Stock</h3>
+              <form id="sell-form" onsubmit="handleSell(event)">
+                <div class="form-group" style="margin-bottom: 1rem">
+                  <label>Stock ID</label>
+                  <input type="number" id="sell-stock-id" required />
+                </div>
+                <div class="form-group" style="margin-bottom: 1rem">
+                  <label>Quantity</label>
+                  <input type="number" id="sell-quantity" min="1" required />
+                </div>
+                <div class="form-group" style="margin-bottom: 1rem">
+                  <label>Order Type</label>
+                  <select id="sell-order-type" onchange="toggleSellLimit()">
+                    <option value="MARKET">Market</option>
+                    <option value="LIMIT">Limit</option>
+                  </select>
+                </div>
+                <div
+                  class="form-group"
+                  style="margin-bottom: 1rem; display: none"
+                  id="sell-limit-group"
+                >
+                  <label>Limit Price (₹)</label>
+                  <input type="number" id="sell-limit-price" step="0.01" />
+                </div>
+                <button type="submit" class="btn-submit">
+                  Place Sell Order
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- List Stock Tab -->
+        <div id="list-stock" class="tab-pane">
+          <h2>List Your Stock</h2>
+          <div id="liststock-alert"></div>
+
+          <form id="liststock-form" onsubmit="handleListStock(event)">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Company Name</label>
+                <input type="text" id="company-name" required />
+              </div>
+              <div class="form-group">
+                <label>Quantity (Shares)</label>
+                <input type="number" id="stock-quantity" min="1" required />
+              </div>
+              <div class="form-group">
+                <label>Price per Share (₹)</label>
+                <input
+                  type="number"
+                  id="stock-price"
+                  step="0.01"
+                  min="0.01"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label>Sector</label>
+                <input type="text" id="sector" placeholder="e.g., Technology" />
+              </div>
+            </div>
+            <button type="submit" class="btn-submit">List Stock</button>
+          </form>
+        </div>
+
+        <!-- History Tab -->
+        <div id="history" class="tab-pane">
+          <h2>Transaction History</h2>
+          <div id="history-alert"></div>
+          <div id="history-table"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://localhost:4000";
+      let authToken = localStorage.getItem("authToken");
+      let userId = localStorage.getItem("userId");
+
+      // Check authentication
+      if (!authToken || !userId) {
+        window.location.href = "login.html";
+      }
+
+      // Load user data on page load
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("username").textContent = userId;
+        document.getElementById("userid").textContent = userId;
+        loadPortfolio();
+        loadHistory();
+      });
+
+      function showTab(tabName) {
+        // Hide all tabs
+        document
+          .querySelectorAll(".tab-pane")
+          .forEach((pane) => pane.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-button")
+          .forEach((btn) => btn.classList.remove("active"));
+
+        // Show selected tab
+        document.getElementById(tabName).classList.add("active");
+        event.target.classList.add("active");
+      }
+
+      function toggleBuyLimit() {
+        const type = document.getElementById("buy-order-type").value;
+        document.getElementById("buy-limit-group").style.display =
+          type === "LIMIT" ? "flex" : "none";
+      }
+
+      function toggleSellLimit() {
+        const type = document.getElementById("sell-order-type").value;
+        document.getElementById("sell-limit-group").style.display =
+          type === "LIMIT" ? "flex" : "none";
+      }
+
+      async function loadPortfolio() {
+        try {
+          const response = await fetch(`${API_URL}/user/portfolio/${userId}`, {
+            headers: { Authorization: `Bearer ${authToken}` },
+          });
+          const data = await response.json();
+
+          if (response.ok) {
+            if (data.wallet) {
+              document.getElementById("total-balance").textContent =
+                data.wallet.balance.toFixed(2);
+              document.getElementById("locked-amount").textContent =
+                data.wallet.reserved_amount.toFixed(2);
+            }
+
+            if (data.holdings && data.holdings.length > 0) {
+              let html =
+                "<table><tr><th>Stock ID</th><th>Company</th><th>Quantity</th><th>Avg Price</th><th>Value</th></tr>";
+              data.holdings.forEach((h) => {
+                const value = (h.quantity * h.average_price).toFixed(2);
+                html += `<tr><td>${h.stock_id}</td><td>${
+                  h.company_name
+                }</td><td>${h.quantity}</td><td>₹${h.average_price.toFixed(
+                  2
+                )}</td><td>₹${value}</td></tr>`;
+              });
+              html += "</table>";
+              document.getElementById("holdings-table").innerHTML = html;
+              document.getElementById("total-holdings").textContent =
+                data.holdings.length;
+            } else {
+              document.getElementById("holdings-table").innerHTML =
+                "<p>No holdings yet</p>";
+            }
+          }
+        } catch (err) {
+          console.error("Error loading portfolio:", err);
+        }
+      }
+
+      async function handleBuy(e) {
+        e.preventDefault();
+        const stock_id = parseInt(
+          document.getElementById("buy-stock-id").value
+        );
+        const quantity = parseInt(
+          document.getElementById("buy-quantity").value
+        );
+        const order_type = document.getElementById("buy-order-type").value;
+        const limit_price =
+          order_type === "LIMIT"
+            ? parseFloat(document.getElementById("buy-limit-price").value)
+            : null;
+
+        try {
+          const body = {
+            user_id: parseInt(userId),
+            stock_id,
+            quantity,
+            order_type,
+          };
+          if (limit_price) body.limit_price = limit_price;
+
+          const response = await fetch(`${API_URL}/user/buyStock`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${authToken}`,
+            },
+            body: JSON.stringify(body),
+          });
+
+          const data = await response.json();
+          const alertDiv = document.getElementById("trading-alert");
+
+          if (response.ok) {
+            alertDiv.innerHTML = `<div class="alert success">✅ Buy order placed! Order ID: ${data.orderId}</div>`;
+            document.getElementById("buy-form").reset();
+            setTimeout(() => loadPortfolio(), 1000);
+          } else {
+            alertDiv.innerHTML = `<div class="alert error">❌ ${
+              data.message || "Order failed"
+            }</div>`;
+          }
+        } catch (err) {
+          document.getElementById(
+            "trading-alert"
+          ).innerHTML = `<div class="alert error">❌ Error: ${err.message}</div>`;
+        }
+      }
+
+      async function handleSell(e) {
+        e.preventDefault();
+        const stock_id = parseInt(
+          document.getElementById("sell-stock-id").value
+        );
+        const quantity = parseInt(
+          document.getElementById("sell-quantity").value
+        );
+        const order_type = document.getElementById("sell-order-type").value;
+        const limit_price =
+          order_type === "LIMIT"
+            ? parseFloat(document.getElementById("sell-limit-price").value)
+            : null;
+
+        try {
+          const body = {
+            user_id: parseInt(userId),
+            stock_id,
+            quantity,
+            order_type,
+          };
+          if (limit_price) body.limit_price = limit_price;
+
+          const response = await fetch(`${API_URL}/user/sellStock`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${authToken}`,
+            },
+            body: JSON.stringify(body),
+          });
+
+          const data = await response.json();
+          const alertDiv = document.getElementById("trading-alert");
+
+          if (response.ok) {
+            alertDiv.innerHTML = `<div class="alert success">✅ Sell order placed! Order ID: ${data.orderId}</div>`;
+            document.getElementById("sell-form").reset();
+            setTimeout(() => loadPortfolio(), 1000);
+          } else {
+            alertDiv.innerHTML = `<div class="alert error">❌ ${
+              data.message || "Order failed"
+            }</div>`;
+          }
+        } catch (err) {
+          document.getElementById(
+            "trading-alert"
+          ).innerHTML = `<div class="alert error">❌ Error: ${err.message}</div>`;
+        }
+      }
+
+      async function handleListStock(e) {
+        e.preventDefault();
+        const company_name = document.getElementById("company-name").value;
+        const quantity = parseInt(
+          document.getElementById("stock-quantity").value
+        );
+        const price_per_share = parseFloat(
+          document.getElementById("stock-price").value
+        );
+        const sector = document.getElementById("sector").value || "General";
+
+        try {
+          const response = await fetch(`${API_URL}/company/listStock`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${authToken}`,
+            },
+            body: JSON.stringify({
+              company_name,
+              quantity,
+              price_per_share,
+              sector,
+            }),
+          });
+
+          const data = await response.json();
+          const alertDiv = document.getElementById("liststock-alert");
+
+          if (response.ok) {
+            alertDiv.innerHTML = `<div class="alert success">✅ Stock listed successfully! Stock ID: ${data.stockId}</div>`;
+            document.getElementById("liststock-form").reset();
+          } else {
+            alertDiv.innerHTML = `<div class="alert error">❌ ${
+              data.message || "Listing failed"
+            }</div>`;
+          }
+        } catch (err) {
+          document.getElementById(
+            "liststock-alert"
+          ).innerHTML = `<div class="alert error">❌ Error: ${err.message}</div>`;
+        }
+      }
+
+      async function loadHistory() {
+        try {
+          const response = await fetch(`${API_URL}/user/history/${userId}`, {
+            headers: { Authorization: `Bearer ${authToken}` },
+          });
+          const data = await response.json();
+
+          if (response.ok && data.transactions) {
+            let html =
+              "<table><tr><th>Date</th><th>Type</th><th>Amount</th><th>Status</th></tr>";
+            data.transactions.forEach((t) => {
+              const date = new Date(t.transaction_date).toLocaleString();
+              html += `<tr><td>${date}</td><td>${
+                t.transaction_type
+              }</td><td>₹${t.amount.toFixed(2)}</td><td>${t.status}</td></tr>`;
+            });
+            html += "</table>";
+            document.getElementById("history-table").innerHTML = html;
+          } else {
+            document.getElementById("history-table").innerHTML =
+              "<p>No transaction history</p>";
+          }
+        } catch (err) {
+          console.error("Error loading history:", err);
+        }
+      }
+
+      function logout() {
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("userId");
+        window.location.href = "index-new.html";
+      }
+    </script>
+  </body>
+</html>

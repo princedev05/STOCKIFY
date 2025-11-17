@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Dashboard - Stock Market Simulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+            color: #333;
+        }
+
+        /* Navigation */
+        nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            background: white;
+            color: #667eea;
+            padding: 0.6rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+            font-weight: 600;
+            transition: transform 0.3s;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: #333;
+        }
+
+        /* Tabs Navigation */
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 15px 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: #999;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            margin-bottom: -2px;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-btn:hover {
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Cards Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            color: #999;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stat-card .subtext {
+            font-size: 0.85rem;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        /* Tables */
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Forms */
+        .form-section {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .form-section h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-danger {
+            background: #ff4757;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ff3838;
+        }
+
+        /* Messages */
+        .message {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+
+        .spinner {
+            border: 4px solid #f0f0f0;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            table {
+                font-size: 0.9rem;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-inactive {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="nav-brand">📈 Stock Market Sim</a>
+            <ul class="nav-links">
+                <li id="companyName" style="color: white;"></li>
+                <li><button class="logout-btn" onclick="logout()">Logout</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="header">
+            <h1>Company Dashboard</h1>
+        </div>
+
+        <!-- Messages -->
+        <div id="successMessage" class="message success"></div>
+        <div id="errorMessage" class="message error"></div>
+
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('financials')">📊 Financial Dashboard</button>
+            <button class="tab-btn" onclick="switchTab('shareholders')">👥 Shareholders</button>
+            <button class="tab-btn" onclick="switchTab('news')">📰 News & Announcements</button>
+            <button class="tab-btn" onclick="switchTab('dividends')">💰 Dividends</button>
+        </div>
+
+        <!-- FINANCIAL DASHBOARD TAB -->
+        <div id="financials" class="tab-content active">
+            <div id="financialsLoading" class="loading">
+                <div class="spinner"></div>
+                Loading financial data...
+            </div>
+            <div id="financialsContent" style="display: none;">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Shares Issued</h3>
+                        <div class="value" id="totalShares">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Investors</h3>
+                        <div class="value" id="investorCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Market Cap</h3>
+                        <div class="value" id="marketCap">₹0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Current Stock Price</h3>
+                        <div class="value" id="stockPrice">₹0</div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <h3 style="padding: 20px 25px; margin-bottom: 0;">Stock Information</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Stock ID</th>
+                                <th>Current Price</th>
+                                <th>Total Shares</th>
+                                <th>Available Shares</th>
+                                <th>Listing Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stocksTable">
+                            <tr><td colspan="5" style="text-align: center; color: #999;">No stocks listed</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SHAREHOLDERS TAB -->
+        <div id="shareholders" class="tab-content">
+            <div id="shareholdersLoading" class="loading">
+                <div class="spinner"></div>
+                Loading shareholder data...
+            </div>
+            <div id="shareholdersContent" style="display: none;">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Shareholders</h3>
+                        <div class="value" id="totalShareholders">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Largest Shareholder</h3>
+                        <div class="value" id="largestOwnership">0%</div>
+                        <div class="subtext" id="largestName">-</div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <h3 style="padding: 20px 25px; margin-bottom: 0;">Shareholder List</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Total Shares</th>
+                                <th>Ownership %</th>
+                                <th>Avg Buy Price</th>
+                                <th>Current Value</th>
+                                <th>Gain/Loss</th>
+                            </tr>
+                        </thead>
+                        <tbody id="shareholdersList">
+                            <tr><td colspan="6" style="text-align: center; color: #999;">No shareholders</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEWS TAB -->
+        <div id="news" class="tab-content">
+            <div class="form-section">
+                <h3>📢 Post New Announcement</h3>
+                <form id="newsForm" onsubmit="submitNews(event)">
+                    <div class="form-group">
+                        <label for="newsTitle">Title *</label>
+                        <input type="text" id="newsTitle" required placeholder="Announcement title">
+                    </div>
+                    <div class="form-group">
+                        <label for="newsType">News Type</label>
+                        <select id="newsType">
+                            <option value="announcement">Announcement</option>
+                            <option value="financial">Financial</option>
+                            <option value="dividend">Dividend</option>
+                            <option value="event">Event</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="newsContent">Content *</label>
+                        <textarea id="newsContent" required placeholder="Write your announcement here..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Post Announcement</button>
+                </form>
+            </div>
+
+            <div id="newsLoading" class="loading">
+                <div class="spinner"></div>
+                Loading news...
+            </div>
+            <div id="newsContent" style="display: none;">
+                <div id="newsList"></div>
+            </div>
+        </div>
+
+        <!-- DIVIDENDS TAB -->
+        <div id="dividends" class="tab-content">
+            <div class="form-section">
+                <h3>💰 Declare Dividend</h3>
+                <form id="dividendForm" onsubmit="submitDividend(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dividendAmount">Dividend Amount (per share) *</label>
+                            <input type="number" id="dividendAmount" required step="0.01" min="0" placeholder="Enter amount">
+                        </div>
+                        <div class="form-group">
+                            <label for="dividendDate">Dividend Announcement Date *</label>
+                            <input type="date" id="dividendDate" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="recordDate">Record Date *</label>
+                            <input type="date" id="recordDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="paymentDate">Payment Date *</label>
+                            <input type="date" id="paymentDate" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Declare Dividend</button>
+                </form>
+            </div>
+
+            <div id="dividendsLoading" class="loading">
+                <div class="spinner"></div>
+                Loading dividends...
+            </div>
+            <div id="dividendsContent" style="display: none;">
+                <div class="table-container">
+                    <h3 style="padding: 20px 25px; margin-bottom: 0;">Dividend History</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Amount (per share)</th>
+                                <th>Announcement Date</th>
+                                <th>Record Date</th>
+                                <th>Payment Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dividendsList">
+                            <tr><td colspan="5" style="text-align: center; color: #999;">No dividends</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:4000";
+        let currentCompanyId = null;
+
+        // Get token from localStorage
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+
+        // Check authentication
+        async function checkAuth() {
+            const token = getToken();
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/company/info`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Not authorized');
+                }
+
+                const company = await response.json();
+                document.getElementById('companyName').textContent = company.company_name;
+                currentCompanyId = company.company_id;
+
+                // Load initial data
+                loadFinancials();
+                loadShareholderStats();
+                loadNews();
+                loadDividends();
+            } catch (err) {
+                console.error('Auth error:', err);
+                localStorage.removeItem('token');
+                window.location.href = '/login.html';
+            }
+        }
+
+        // Switch tabs
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Load Financial Data
+        async function loadFinancials() {
+            const token = getToken();
+            try {
+                const response = await fetch(`${API_URL}/company-dashboard/financials`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to load financials');
+
+                const data = await response.json();
+
+                // Update stat cards
+                document.getElementById('totalShares').textContent = (data.total_shares_issued || 0).toLocaleString();
+                document.getElementById('investorCount').textContent = data.shareholder_count || 0;
+                document.getElementById('marketCap').textContent = '₹' + (data.market_cap || 0).toLocaleString();
+
+                // Update stocks table
+                const stocksBody = document.getElementById('stocksTable');
+                if (data.stocks && data.stocks.length > 0) {
+                    document.getElementById('stockPrice').textContent = '₹' + data.stocks[0].current_price;
+                    stocksBody.innerHTML = data.stocks.map(stock => `
+                        <tr>
+                            <td>#${stock.stock_id}</td>
+                            <td>₹${stock.current_price}</td>
+                            <td>${stock.total_shares.toLocaleString()}</td>
+                            <td>${stock.available_shares.toLocaleString()}</td>
+                            <td>${stock.listing_date || 'N/A'}</td>
+                        </tr>
+                    `).join('');
+                }
+
+                document.getElementById('financialsLoading').style.display = 'none';
+                document.getElementById('financialsContent').style.display = 'block';
+            } catch (err) {
+                console.error('Error loading financials:', err);
+                showError('Failed to load financial data');
+            }
+        }
+
+        // Load Shareholder Stats
+        async function loadShareholderStats() {
+            const token = getToken();
+            try {
+                const response = await fetch(`${API_URL}/company-dashboard/shareholders/stats`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to load shareholders');
+
+                const data = await response.json();
+                const stats = data.statistics;
+                const topShareholders = data.top_shareholders;
+
+                document.getElementById('totalShareholders').textContent = stats.total_shareholders || 0;
+
+                if (topShareholders && topShareholders.length > 0) {
+                    document.getElementById('largestOwnership').textContent = 
+                        (topShareholders[0].ownership_percentage || 0).toFixed(2) + '%';
+                    document.getElementById('largestName').textContent = topShareholders[0].username || 'N/A';
+                }
+
+                // Load full shareholder list
+                const shareResponse = await fetch(`${API_URL}/company-dashboard/shareholders`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const shareholders = await shareResponse.json();
+                const tbody = document.getElementById('shareholdersList');
+                if (shareholders && shareholders.length > 0) {
+                    tbody.innerHTML = shareholders.map(sh => `
+                        <tr>
+                            <td>${sh.username || 'Anonymous'}</td>
+                            <td>${sh.total_shares.toLocaleString()}</td>
+                            <td>${(sh.ownership_percentage || 0).toFixed(2)}%</td>
+                            <td>₹${(sh.avg_buy_price || 0).toFixed(2)}</td>
+                            <td>₹${(sh.current_value || 0).toLocaleString()}</td>
+                            <td>${(sh.investment_gain_loss || 0).toLocaleString()}</td>
+                        </tr>
+                    `).join('');
+                }
+
+                document.getElementById('shareholdersLoading').style.display = 'none';
+                document.getElementById('shareholdersContent').style.display = 'block';
+            } catch (err) {
+                console.error('Error loading shareholders:', err);
+                showError('Failed to load shareholder data');
+            }
+        }
+
+        // Load News
+        async function loadNews() {
+            const token = getToken();
+            try {
+                const response = await fetch(`${API_URL}/company-dashboard/news`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to load news');
+
+                const news = await response.json();
+                const newsList = document.getElementById('newsList');
+
+                if (news && news.length > 0) {
+                    newsList.innerHTML = news.map(item => `
+                        <div class="table-container" style="margin-bottom: 20px;">
+                            <div style="padding: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div>
+                                        <h4 style="margin-bottom: 5px;">${item.title}</h4>
+                                        <span class="badge badge-active">${item.news_type}</span>
+                                        <p style="color: #999; margin-top: 10px; font-size: 0.9rem;">
+                                            By ${item.author || 'Admin'} • ${new Date(item.published_at).toLocaleDateString()}
+                                        </p>
+                                    </div>
+                                    <button class="btn btn-danger btn-small" onclick="deleteNews(${item.news_id})" style="padding: 8px 15px; font-size: 0.9rem;">Delete</button>
+                                </div>
+                                <p style="margin-top: 15px; line-height: 1.6;">${item.content}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    newsList.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">No announcements yet</p>';
+                }
+
+                document.getElementById('newsLoading').style.display = 'none';
+                document.getElementById('newsContent').style.display = 'block';
+            } catch (err) {
+                console.error('Error loading news:', err);
+                showError('Failed to load news');
+            }
+        }
+
+        // Load Dividends
+        async function loadDividends() {
+            const token = getToken();
+            try {
+                const response = await fetch(`${API_URL}/company-dashboard/dividends`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to load dividends');
+
+                const dividends = await response.json();
+                const tbody = document.getElementById('dividendsList');
+
+                if (dividends && dividends.length > 0) {
+                    tbody.innerHTML = dividends.map(div => `
+                        <tr>
+                            <td>₹${div.dividend_amount}</td>
+                            <td>${div.dividend_date}</td>
+                            <td>${div.record_date}</td>
+                            <td>${div.payment_date}</td>
+                            <td><span class="badge badge-${div.status === 'paid' ? 'active' : 'inactive'}">${div.status}</span></td>
+                        </tr>
+                    `).join('');
+                }
+
+                document.getElementById('dividendsLoading').style.display = 'none';
+                document.getElementById('dividendsContent').style.display = 'block';
+            } catch (err) {
+                console.error('Error loading dividends:', err);
+                showError('Failed to load dividends');
+            }
+        }
+
+        // Submit News
+        async function submitNews(event) {
+            event.preventDefault();
+            const token = getToken();
+
+            const title = document.getElementById('newsTitle').value;
+            const content = document.getElementById('newsContent').value;
+            const newsType = document.getElementById('newsType').value;
+
+            try {
+                const response = await fetch(`${API_URL}/company-dashboard/news`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title, content, news_type: newsType })
+                });
+
+                if (!response.ok) throw new Error('Failed to post news');
+
+                showSuccess('Announcement posted successfully!');
+                document.getElementById('newsForm').reset();
+                loadNews();
+            } catch (err) {
+                showError('Error posting announcement: ' + err.message);
+            }
+        }
+
+        // Delete News
+        async function deleteNews(newsId) {
+            if (!confirm('Are you sure you want to delete this announcement?')) return;
+
+            const token = getToken();
+            try {
+                const response = await fetch(`${API_URL}/company-dashboard/news/${newsId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to delete');
+
+                showSuccess('Announcement deleted!');
+                loadNews();
+            } catch (err) {
+                showError('Error deleting announcement');
+            }
+        }
+
+        // Submit Dividend
+        async function submitDividend(event) {
+            event.preventDefault();
+            const token = getToken();
+
+            const dividendAmount = document.getElementById('dividendAmount').value;
+            const dividendDate = document.getElementById('dividendDate').value;
+            const recordDate = document.getElementById('recordDate').value;
+            const paymentDate = document.getElementById('paymentDate').value;
+
+            try {
+                const response = await fetch(`${API_URL}/company-dashboard/dividends`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        dividend_amount: dividendAmount,
+                        dividend_date: dividendDate,
+                        record_date: recordDate,
+                        payment_date: paymentDate
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to declare dividend');
+
+                showSuccess('Dividend declared successfully!');
+                document.getElementById('dividendForm').reset();
+                loadDividends();
+            } catch (err) {
+                showError('Error declaring dividend: ' + err.message);
+            }
+        }
+
+        // Show messages
+        function showSuccess(msg) {
+            const el = document.getElementById('successMessage');
+            el.textContent = msg;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 3000);
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorMessage');
+            el.textContent = msg;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 3000);
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/';
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', checkAuth);
+    </script>
+</body>
+</html>

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stock Market Simulation</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+      }
+      header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        text-align: center;
+      }
+      nav {
+        display: flex;
+        gap: 0;
+        flex-wrap: wrap;
+      }
+      nav button {
+        flex: 1;
+        padding: 15px;
+        border: none;
+        background: #f5f5f5;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s;
+      }
+      nav button.active {
+        background: #667eea;
+        color: white;
+      }
+      nav button:hover {
+        background: #e0e0e0;
+      }
+      nav button.active:hover {
+        background: #667eea;
+      }
+      .content {
+        padding: 30px;
+      }
+      .tab {
+        display: none;
+      }
+      .tab.active {
+        display: block;
+      }
+      h2 {
+        color: #333;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 10px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        color: #333;
+        font-weight: 500;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+      button[type="submit"] {
+        background: #667eea;
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s;
+      }
+      button[type="submit"]:hover {
+        background: #764ba2;
+        transform: translateY(-2px);
+      }
+      .alert {
+        padding: 12px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+      }
+      .alert.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      .alert.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      @media (max-width: 600px) {
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+        nav {
+          flex-direction: column;
+        }
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+      th {
+        background: #667eea;
+        color: white;
+        font-weight: 600;
+      }
+      tr:hover {
+        background: #f5f5f5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>📈 Stock Market Simulation System</h1>
+        <p>Trade stocks, manage portfolios, and track market data</p>
+      </header>
+
+      <nav>
+        <button onclick="showTab('register')" class="tab-btn active">
+          Register
+        </button>
+        <button onclick="showTab('login')" class="tab-btn">Login</button>
+        <button onclick="showTab('liststock')" class="tab-btn">
+          List Stock
+        </button>
+        <button onclick="showTab('buy')" class="tab-btn">Buy Stock</button>
+        <button onclick="showTab('sell')" class="tab-btn">Sell Stock</button>
+        <button onclick="showTab('portfolio')" class="tab-btn">
+          My Portfolio
+        </button>
+        <button onclick="showTab('history')" class="tab-btn">History</button>
+      </nav>
+
+      <div class="content">
+        <!-- REGISTER TAB -->
+        <div id="register" class="tab active">
+          <h2>Create Account</h2>
+          <div id="register-alert"></div>
+          <form onsubmit="handleRegister(event)">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="reg-username">Username</label>
+                <input type="text" id="reg-username" required />
+              </div>
+              <div class="form-group">
+                <label for="reg-email">Email</label>
+                <input type="email" id="reg-email" required />
+              </div>
+              <div class="form-group">
+                <label for="reg-name">Full Name</label>
+                <input type="text" id="reg-name" required />
+              </div>
+              <div class="form-group">
+                <label for="reg-password">Password</label>
+                <input type="password" id="reg-password" required />
+              </div>
+              <div class="form-group">
+                <label for="reg-role">Role</label>
+                <select id="reg-role">
+                  <option value="investor">Investor</option>
+                  <option value="company">Company</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit">Register</button>
+          </form>
+        </div>
+
+        <!-- LOGIN TAB -->
+        <div id="login" class="tab">
+          <h2>Login</h2>
+          <div id="login-alert"></div>
+          <form onsubmit="handleLogin(event)">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="login-username">Username or Email</label>
+                <input type="text" id="login-username" required />
+              </div>
+              <div class="form-group">
+                <label for="login-password">Password</label>
+                <input type="password" id="login-password" required />
+              </div>
+            </div>
+            <button type="submit">Login</button>
+          </form>
+        </div>
+
+        <!-- LIST STOCK TAB -->
+        <div id="liststock" class="tab">
+          <h2>List New Stock</h2>
+          <div id="liststock-alert"></div>
+          <form onsubmit="handleListStock(event)">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="list-company-name">Company Name</label>
+                <input type="text" id="list-company-name" required />
+              </div>
+              <div class="form-group">
+                <label for="list-quantity">Quantity (Shares)</label>
+                <input type="number" id="list-quantity" min="1" required />
+              </div>
+              <div class="form-group">
+                <label for="list-price">Price per Share (₹)</label>
+                <input
+                  type="number"
+                  id="list-price"
+                  min="0.01"
+                  step="0.01"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="list-sector">Sector</label>
+                <input
+                  type="text"
+                  id="list-sector"
+                  placeholder="e.g., Technology, Finance"
+                />
+              </div>
+            </div>
+            <button type="submit">List Stock</button>
+          </form>
+        </div>
+
+        <!-- BUY STOCK TAB -->
+        <div id="buy" class="tab">
+          <h2>Buy Stock</h2>
+          <div id="buy-alert"></div>
+          <form onsubmit="handleBuyStock(event)">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="buy-user-id">Your User ID</label>
+                <input type="number" id="buy-user-id" min="1" required />
+              </div>
+              <div class="form-group">
+                <label for="buy-stock-id">Stock ID</label>
+                <input type="number" id="buy-stock-id" min="1" required />
+              </div>
+              <div class="form-group">
+                <label for="buy-quantity">Quantity</label>
+                <input type="number" id="buy-quantity" min="1" required />
+              </div>
+              <div class="form-group">
+                <label for="buy-order-type">Order Type</label>
+                <select id="buy-order-type">
+                  <option value="MARKET">Market</option>
+                  <option value="LIMIT">Limit</option>
+                </select>
+              </div>
+              <div
+                class="form-group"
+                id="buy-limit-price-group"
+                style="display: none"
+              >
+                <label for="buy-limit-price">Limit Price (₹)</label>
+                <input
+                  type="number"
+                  id="buy-limit-price"
+                  min="0.01"
+                  step="0.01"
+                />
+              </div>
+            </div>
+            <button type="submit">Place Buy Order</button>
+          </form>
+        </div>
+
+        <!-- SELL STOCK TAB -->
+        <div id="sell" class="tab">
+          <h2>Sell Stock</h2>
+          <div id="sell-alert"></div>
+          <form onsubmit="handleSellStock(event)">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="sell-user-id">Your User ID</label>
+                <input type="number" id="sell-user-id" min="1" required />
+              </div>
+              <div class="form-group">
+                <label for="sell-stock-id">Stock ID</label>
+                <input type="number" id="sell-stock-id" min="1" required />
+              </div>
+              <div class="form-group">
+                <label for="sell-quantity">Quantity</label>
+                <input type="number" id="sell-quantity" min="1" required />
+              </div>
+              <div class="form-group">
+                <label for="sell-order-type">Order Type</label>
+                <select id="sell-order-type">
+                  <option value="MARKET">Market</option>
+                  <option value="LIMIT">Limit</option>
+                </select>
+              </div>
+              <div
+                class="form-group"
+                id="sell-limit-price-group"
+                style="display: none"
+              >
+                <label for="sell-limit-price">Limit Price (₹)</label>
+                <input
+                  type="number"
+                  id="sell-limit-price"
+                  min="0.01"
+                  step="0.01"
+                />
+              </div>
+            </div>
+            <button type="submit">Place Sell Order</button>
+          </form>
+        </div>
+
+        <!-- PORTFOLIO TAB -->
+        <div id="portfolio" class="tab">
+          <h2>My Portfolio</h2>
+          <div id="portfolio-alert"></div>
+          <form
+            onsubmit="handleViewPortfolio(event)"
+            style="margin-bottom: 20px"
+          >
+            <div class="form-group" style="max-width: 300px">
+              <label for="portfolio-user-id">Your User ID</label>
+              <input type="number" id="portfolio-user-id" min="1" required />
+            </div>
+            <button type="submit">View Portfolio</button>
+          </form>
+          <div id="portfolio-data"></div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div id="history" class="tab">
+          <h2>Transaction History</h2>
+          <div id="history-alert"></div>
+          <form onsubmit="handleViewHistory(event)" style="margin-bottom: 20px">
+            <div class="form-group" style="max-width: 300px">
+              <label for="history-user-id">Your User ID</label>
+              <input type="number" id="history-user-id" min="1" required />
+            </div>
+            <button type="submit">View History</button>
+          </form>
+          <div id="history-data"></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

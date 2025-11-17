@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About - Stock Market Simulation</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: #333;
+        line-height: 1.6;
+      }
+
+      /* Navbar */
+      nav {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1rem 0;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .nav-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .nav-brand {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: white;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        list-style: none;
+        align-items: center;
+      }
+
+      .nav-links a {
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        transition: opacity 0.3s;
+      }
+
+      .nav-links a:hover {
+        opacity: 0.8;
+      }
+
+      .nav-links .btn-signup {
+        background: white;
+        color: #667eea;
+        padding: 0.6rem 1.5rem;
+        border-radius: 4px;
+        transition: transform 0.3s;
+      }
+
+      .nav-links .btn-signup:hover {
+        transform: translateY(-2px);
+      }
+
+      .nav-links .btn-login {
+        background: transparent;
+        border: 2px solid white;
+        color: white;
+        padding: 0.6rem 1.5rem;
+        border-radius: 4px;
+        transition: all 0.3s;
+      }
+
+      .nav-links .btn-login:hover {
+        background: white;
+        color: #667eea;
+      }
+
+      /* Header */
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 60px 20px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .header p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+      }
+
+      /* Main Content */
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 60px 20px;
+      }
+
+      .section {
+        margin-bottom: 4rem;
+      }
+
+      .section h2 {
+        color: #667eea;
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 3px solid #667eea;
+        padding-bottom: 0.5rem;
+      }
+
+      .section p {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+      }
+
+      .features-list {
+        list-style: none;
+        padding: 0;
+      }
+
+      .features-list li {
+        background: #f5f5f5;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        border-left: 4px solid #667eea;
+        border-radius: 4px;
+      }
+
+      .features-list li strong {
+        color: #667eea;
+      }
+
+      .tech-stack {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+      }
+
+      .tech-item {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+
+      .tech-item h4 {
+        color: #667eea;
+        margin-bottom: 0.5rem;
+      }
+
+      .tech-item p {
+        color: #666;
+        font-size: 0.95rem;
+      }
+
+      /* Footer */
+      footer {
+        background: #333;
+        color: white;
+        text-align: center;
+        padding: 2rem;
+        margin-top: 60px;
+      }
+
+      @media (max-width: 768px) {
+        .header h1 {
+          font-size: 1.8rem;
+        }
+
+        .section h2 {
+          font-size: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav>
+      <div class="nav-container">
+        <a href="/" class="nav-brand"> 📈 Stock Market Sim </a>
+        <ul class="nav-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="blog.html">Blog</a></li>
+          <li><a href="list.html">List Stock</a></li>
+          <li><a href="signup.html" class="btn-signup">Sign Up</a></li>
+          <li><a href="login.html" class="btn-login">Login</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="header">
+      <h1>About Our Platform</h1>
+      <p>
+        A comprehensive stock market simulation system built with
+        enterprise-grade technology
+      </p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+      <!-- About Section -->
+      <section class="section">
+        <h2>🎯 What is Stock Market Simulation?</h2>
+        <p>
+          Stock Market Simulation is an educational platform designed to teach
+          users about stock trading, portfolio management, and financial
+          markets. Our platform provides a safe, risk-free environment where
+          users can practice trading strategies, learn market dynamics, and
+          develop their investment skills.
+        </p>
+        <p>
+          Whether you're a beginner learning the basics or an advanced trader
+          testing new strategies, our platform offers realistic market
+          conditions with real-time order matching and transaction processing.
+        </p>
+      </section>
+
+      <!-- Key Features -->
+      <section class="section">
+        <h2>✨ Key Features</h2>
+        <ul class="features-list">
+          <li>
+            <strong>Real-Time Trading:</strong> Experience live market
+            simulation with instant order execution
+          </li>
+          <li>
+            <strong>Order Types:</strong> Support for both market orders and
+            limit orders
+          </li>
+          <li>
+            <strong>Automatic Matching:</strong> Intelligent order matching
+            engine with price-time priority
+          </li>
+          <li>
+            <strong>Portfolio Management:</strong> Track holdings, view
+            performance, and manage your investments
+          </li>
+          <li>
+            <strong>Transaction History:</strong> Complete audit trail of all
+            trading activities
+          </li>
+          <li>
+            <strong>Secure Authentication:</strong> BCrypt password hashing and
+            JWT token-based security
+          </li>
+          <li>
+            <strong>ACID Compliance:</strong> Database transactions with full
+            ACID properties
+          </li>
+          <li>
+            <strong>Multiple User Roles:</strong> Support for investors and
+            company accounts
+          </li>
+        </ul>
+      </section>
+
+      <!-- Technology Stack -->
+      <section class="section">
+        <h2>🛠️ Technology Stack</h2>
+        <div class="tech-stack">
+          <div class="tech-item">
+            <h4>Backend</h4>
+            <p><strong>Node.js</strong> with Express.js for REST API</p>
+          </div>
+          <div class="tech-item">
+            <h4>Database</h4>
+            <p><strong>MySQL 5.7+</strong> with InnoDB for ACID compliance</p>
+          </div>
+          <div class="tech-item">
+            <h4>Frontend</h4>
+            <p>
+              <strong>HTML5</strong>, <strong>CSS3</strong>,
+              <strong>JavaScript</strong>
+            </p>
+          </div>
+          <div class="tech-item">
+            <h4>Security</h4>
+            <p>
+              <strong>BCryptjs</strong> for password hashing,
+              <strong>JWT</strong> for authentication
+            </p>
+          </div>
+          <div class="tech-item">
+            <h4>Architecture</h4>
+            <p>RESTful API with stored procedures and database triggers</p>
+          </div>
+          <div class="tech-item">
+            <h4>Matching Engine</h4>
+            <p>Real-time order matching with transaction support</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- How It Works -->
+      <section class="section">
+        <h2>⚙️ How It Works</h2>
+        <p>
+          <strong>1. Registration:</strong> Users sign up as either an investor
+          or company. Investors receive ₹100,000 in virtual trading capital.
+        </p>
+        <p>
+          <strong>2. Company Listings:</strong> Companies can list their stocks
+          with a specific price and quantity.
+        </p>
+        <p>
+          <strong>3. Trading:</strong> Investors place buy or sell orders.
+          Orders are matched automatically by our matching engine in real-time.
+        </p>
+        <p>
+          <strong>4. Portfolio Management:</strong> Users can view their
+          holdings, transaction history, and portfolio performance.
+        </p>
+        <p>
+          <strong>5. Market Dynamics:</strong> Stock prices update dynamically,
+          and all transactions are recorded with full audit trails.
+        </p>
+      </section>
+
+      <!-- Use Cases -->
+      <section class="section">
+        <h2>💡 Use Cases</h2>
+        <p>
+          <strong>Educational Learning:</strong> Perfect for finance students
+          and individuals learning about markets.
+        </p>
+        <p>
+          <strong>Trading Practice:</strong> Traders can practice strategies
+          without risking real money.
+        </p>
+        <p>
+          <strong>Investment Simulation:</strong> Build and test investment
+          portfolios in a controlled environment.
+        </p>
+        <p>
+          <strong>System Design Practice:</strong> Excellent for learning about
+          database design, order matching algorithms, and financial systems.
+        </p>
+      </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>&copy; 2025 Stock Market Simulation Platform. All rights reserved.</p>
+    </footer>
+  </body>
+</html>

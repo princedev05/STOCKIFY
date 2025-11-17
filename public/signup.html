@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up - Stock Market Simulation</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Navbar */
+      nav {
+        background: rgba(102, 126, 234, 0.95);
+        padding: 1rem 0;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .nav-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .nav-brand {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: white;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        list-style: none;
+        align-items: center;
+      }
+
+      .nav-links a {
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        transition: opacity 0.3s;
+      }
+
+      .nav-links a:hover {
+        opacity: 0.8;
+      }
+
+      .nav-links .btn-login {
+        background: white;
+        color: #667eea;
+        padding: 0.6rem 1.5rem;
+        border-radius: 4px;
+        transition: transform 0.3s;
+      }
+
+      .nav-links .btn-login:hover {
+        transform: translateY(-2px);
+        opacity: 1;
+      }
+
+      /* Main Content */
+      .container {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+      }
+
+      .signup-box {
+        background: white;
+        padding: 3rem;
+        border-radius: 8px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 450px;
+      }
+
+      .signup-box h2 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 2rem;
+        font-size: 2rem;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #333;
+        font-weight: 500;
+      }
+
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+      }
+
+      .form-group select {
+        cursor: pointer;
+      }
+
+      .btn-submit {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+
+      .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      .signup-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #666;
+      }
+
+      .signup-link a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .signup-link a:hover {
+        text-decoration: underline;
+      }
+
+      .alert {
+        padding: 12px;
+        border-radius: 4px;
+        margin-bottom: 1.5rem;
+        display: none;
+      }
+
+      .alert.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+        display: block;
+      }
+
+      .alert.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        display: block;
+      }
+
+      @media (max-width: 600px) {
+        .signup-box {
+          padding: 2rem;
+        }
+
+        .signup-box h2 {
+          font-size: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav>
+      <div class="nav-container">
+        <a href="/" class="nav-brand"> 📈 Stock Market Sim </a>
+        <ul class="nav-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="blog.html">Blog</a></li>
+          <li><a href="list.html">List Stock</a></li>
+          <li>
+            <a href="login.html" class="btn-login">Already have an account?</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Signup Form -->
+    <div class="container">
+      <div class="signup-box">
+        <h2>Create Account</h2>
+        <div id="alert-message"></div>
+
+        <form id="signup-form">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              required
+              placeholder="Choose a unique username"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              required
+              placeholder="Your full name"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              placeholder="your@email.com"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+              placeholder="At least 6 characters"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="role">Account Type</label>
+            <select id="role" name="role" required>
+              <option value="investor">Investor (Buy/Sell Stocks)</option>
+              <option value="company">Company (List Stocks)</option>
+            </select>
+          </div>
+
+          <!-- Company fields (shown only when role is 'company') -->
+          <div id="company-fields" style="display: none;">
+            <div class="form-group">
+              <label for="company_name">Company Name *</label>
+              <input
+                type="text"
+                id="company_name"
+                name="company_name"
+                placeholder="Your company name"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="sector">Sector</label>
+              <input
+                type="text"
+                id="sector"
+                name="sector"
+                placeholder="e.g., Technology, Finance, Healthcare"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="website">Website</label>
+              <input
+                type="text"
+                id="website"
+                name="website"
+                placeholder="https://yourcompany.com"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="description">Description</label>
+              <input
+                type="text"
+                id="description"
+                name="description"
+                placeholder="Brief description of your company"
+              />
+            </div>
+          </div>
+
+          <button type="submit" class="btn-submit">Sign Up</button>
+
+          <p class="signup-link">
+            Already have an account? <a href="login.html">Login here</a>
+          </p>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://localhost:4000";
+
+      // Toggle company fields based on role selection
+      document.getElementById("role").addEventListener("change", (e) => {
+        const companyFields = document.getElementById("company-fields");
+        const companyNameInput = document.getElementById("company_name");
+        
+        if (e.target.value === "company") {
+          companyFields.style.display = "block";
+          companyNameInput.required = true;
+        } else {
+          companyFields.style.display = "none";
+          companyNameInput.required = false;
+          companyNameInput.value = "";
+        }
+      });
+
+      document
+        .getElementById("signup-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const username = document.getElementById("username").value;
+          const name = document.getElementById("name").value;
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+          const role = document.getElementById("role").value;
+          
+          const alertDiv = document.getElementById("alert-message");
+
+          // Prepare payload
+          const payload = { 
+            username, 
+            name, 
+            email, 
+            password, 
+            role 
+          };
+
+          // Add company fields if registering as company
+          if (role === "company") {
+            const company_name = document.getElementById("company_name").value;
+            const sector = document.getElementById("sector").value;
+            const website = document.getElementById("website").value;
+            const description = document.getElementById("description").value;
+
+            if (!company_name) {
+              alertDiv.innerHTML = `<div class="alert error">❌ Company name is required for company registration</div>`;
+              return;
+            }
+
+            payload.company_name = company_name;
+            payload.sector = sector || null;
+            payload.website = website || null;
+            payload.description = description || null;
+          }
+
+          try {
+            const response = await fetch(`${API_URL}/auth/register`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              alertDiv.innerHTML = `<div class="alert success">✅ Account created successfully! Redirecting to login...</div>`;
+              setTimeout(() => {
+                window.location.href = "login.html";
+              }, 2000);
+            } else {
+              alertDiv.innerHTML = `<div class="alert error">❌ ${
+                data.error || data.message || "Registration failed"
+              }</div>`;
+            }
+          } catch (err) {
+            alertDiv.innerHTML = `<div class="alert error">❌ Error: ${err.message}</div>`;
+          }
+        });
+    </script>
+  </body>
+</html>
