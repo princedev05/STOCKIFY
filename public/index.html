@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Stock Market Simulation</title>
+    <title>Stockify</title>
+    <link rel="stylesheet" href="styles.css">
     <style>
       * {
         margin: 0;
@@ -153,7 +154,7 @@
   <body>
     <div class="container">
       <header>
-        <h1>📈 Stock Market Simulation System</h1>
+        <h1>📈 Stockify</h1>
         <p>Trade stocks, manage portfolios, and track market data</p>
       </header>
 
@@ -162,9 +163,9 @@
           Register
         </button>
         <button onclick="showTab('login')" class="tab-btn">Login</button>
-        <button onclick="showTab('liststock')" class="tab-btn">
-          List Stock
-        </button>
+        <!-- List Stock removed for normal users -->
+        <button onclick="window.location.href='company-signup.html'" class="tab-btn">Company Signup</button>
+        <button onclick="window.location.href='company-login.html'" class="tab-btn">Company Login</button>
         <button onclick="showTab('buy')" class="tab-btn">Buy Stock</button>
         <button onclick="showTab('sell')" class="tab-btn">Sell Stock</button>
         <button onclick="showTab('portfolio')" class="tab-btn">

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard - Stock Market Simulation</title>
+    <title>Dashboard - Stockify</title>
     <style>
       * {
         margin: 0;
@@ -265,11 +265,11 @@
   <body>
     <!-- Navbar -->
     <nav>
-      <a href="index-new.html" class="nav-brand"> 📈 Stock Market Sim </a>
+      <a href="index-new.html" class="nav-brand">  STOCKIFY </a>
       <div class="nav-right">
         <div class="user-info">
-          <strong>Welcome, <span id="username"></span></strong>
-          <span>User ID: <span id="userid"></span></span>
+          <strong><span id="username"></span></strong>
+          <span> <span id="userid"></span></span>
         </div>
         <button class="btn-logout" onclick="logout()">Logout</button>
       </div>
@@ -285,8 +285,8 @@
         <button class="tab-button" onclick="showTab('trading')">
           💱 Trading
         </button>
-        <button class="tab-button" onclick="showTab('list-stock')">
-          📈 List Stock
+        <button class="tab-button" onclick="showTab('available-stocks')">
+          📚 Available Stocks
         </button>
         <button class="tab-button" onclick="showTab('history')">
           📜 History
@@ -399,45 +399,42 @@
           </div>
         </div>
 
-        <!-- List Stock Tab -->
-        <div id="list-stock" class="tab-pane">
-          <h2>List Your Stock</h2>
-          <div id="liststock-alert"></div>
-
-          <form id="liststock-form" onsubmit="handleListStock(event)">
-            <div class="form-row">
-              <div class="form-group">
-                <label>Company Name</label>
-                <input type="text" id="company-name" required />
-              </div>
-              <div class="form-group">
-                <label>Quantity (Shares)</label>
-                <input type="number" id="stock-quantity" min="1" required />
-              </div>
-              <div class="form-group">
-                <label>Price per Share (₹)</label>
-                <input
-                  type="number"
-                  id="stock-price"
-                  step="0.01"
-                  min="0.01"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <label>Sector</label>
-                <input type="text" id="sector" placeholder="e.g., Technology" />
-              </div>
-            </div>
-            <button type="submit" class="btn-submit">List Stock</button>
-          </form>
-        </div>
+        <!-- List Stock removed: only companies can list stocks via API -->
 
         <!-- History Tab -->
         <div id="history" class="tab-pane">
           <h2>Transaction History</h2>
           <div id="history-alert"></div>
           <div id="history-table"></div>
+        </div>
+
+        <!-- Available Stocks Tab -->
+        <div id="available-stocks" class="tab-pane">
+          <h2>Available Stocks</h2>
+          <div id="stocks-alert"></div>
+
+          <div style="display:flex; gap:1rem; margin-bottom:1rem; align-items:center">
+            <div>
+              <label>Min Price (₹)</label>
+              <input type="number" id="min-price" step="0.01" placeholder="0" />
+            </div>
+            <div>
+              <label>Max Price (₹)</label>
+              <input type="number" id="max-price" step="0.01" placeholder="" />
+            </div>
+            <div>
+              <label>Search Company or Stock ID</label>
+              <input type="text" id="stock-search" placeholder="Company name or stock id" />
+            </div>
+            <div style="align-self:flex-end">
+              <button class="btn-submit" onclick="searchStocks()">Search</button>
+            </div>
+            <div style="align-self:flex-end">
+              <button class="btn-submit" onclick="resetStockFilters()">Reset</button>
+            </div>
+          </div>
+
+          <div id="stocks-table"></div>
         </div>
       </div>
     </div>
@@ -446,6 +443,7 @@
       const API_URL = "http://localhost:4000";
       let authToken = localStorage.getItem("authToken");
       let userId = localStorage.getItem("userId");
+      let userName = localStorage.getItem("userName");
 
       // Check authentication
       if (!authToken || !userId) {
@@ -454,10 +452,35 @@
 
       // Load user data on page load
       document.addEventListener("DOMContentLoaded", () => {
-        document.getElementById("username").textContent = userId;
-        document.getElementById("userid").textContent = userId;
-        loadPortfolio();
-        loadHistory();
+        // show numeric user id immediately
+        if (userId) document.getElementById("userid").textContent = userId;
+        // show name from localStorage immediately if present
+        if (userName) document.getElementById("username").textContent = userName;
+        // If userId is not in localStorage but token exists, query /auth/me to get it
+        if ((!userId || userId === 'undefined') && authToken) {
+          fetch(`${API_URL}/auth/me`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then((r) => r.json())
+            .then((data) => {
+              if (data && data.user_id) {
+                userId = String(data.user_id);
+                localStorage.setItem('userId', userId);
+                if (data.name) {
+                  userName = data.name;
+                  localStorage.setItem('userName', data.name);
+                  document.getElementById('username').textContent = data.name;
+                }
+              }
+            })
+            .catch((e) => console.warn('Could not fetch /auth/me', e))
+            .finally(() => {
+              loadPortfolio();
+              loadHistory();
+            });
+        } else {
+          // load portfolio (which also returns user's display name and wallet)
+          loadPortfolio();
+          loadHistory();
+        }
       });
 
       function showTab(tabName) {
@@ -494,12 +517,17 @@
           const data = await response.json();
 
           if (response.ok) {
-            if (data.wallet) {
-              document.getElementById("total-balance").textContent =
-                data.wallet.balance.toFixed(2);
-              document.getElementById("locked-amount").textContent =
-                data.wallet.reserved_amount.toFixed(2);
+            // show username if provided
+            if (data.user && data.user.name) {
+              document.getElementById("username").textContent = data.user.name;
             }
+
+            // wallet: fall back to DB defaults if not present
+            const wallet = data.wallet || { balance: 100000.0, reserved_amount: 0.0 };
+            document.getElementById("total-balance").textContent =
+              (wallet.balance || 0).toFixed(2);
+            document.getElementById("locked-amount").textContent =
+              (wallet.reserved_amount || 0).toFixed(2);
 
             if (data.holdings && data.holdings.length > 0) {
               let html =
@@ -561,10 +589,54 @@
           const data = await response.json();
           const alertDiv = document.getElementById("trading-alert");
 
-          if (response.ok) {
-            alertDiv.innerHTML = `<div class="alert success">✅ Buy order placed! Order ID: ${data.orderId}</div>`;
+            if (response.ok) {
+            alertDiv.innerHTML = `<div class="alert success">✅ Buy order placed! Order ID: ${data.orderId}. Waiting for fill...</div>`;
             document.getElementById("buy-form").reset();
-            setTimeout(() => loadPortfolio(), 1000);
+
+            // Poll portfolio until holdings reflect the new purchase
+            const wantedQty = quantity;
+            const targetStockId = stock_id;
+            const user = parseInt(userId);
+            const start = Date.now();
+            const timeoutMs = 30000; // 30s timeout
+            const intervalMs = 1000;
+
+            const check = async () => {
+              try {
+                const pRes = await fetch(`${API_URL}/user/portfolio/${user}`, { headers: { Authorization: `Bearer ${authToken}` } });
+                if (!pRes.ok) return false;
+                const pJson = await pRes.json();
+                const holding = (pJson.holdings || []).find(h => parseInt(h.stock_id) === targetStockId);
+                const currQty = holding ? parseInt(holding.quantity) : 0;
+                if (currQty >= wantedQty) {
+                  // filled
+                  alertDiv.innerHTML = `<div class="alert success">✅ Order filled — holdings updated.</div>`;
+                  loadPortfolio();
+                  // refresh transaction history and shareholders as well
+                  try { loadHistory(); } catch(e) {}
+                  try { loadShareholderStats(); } catch(e) {}
+                  // refresh market stocks view
+                  try { searchStocks(); } catch(e){}
+                  return true;
+                }
+              } catch (err) {
+                console.error('poll error', err);
+              }
+              return false;
+            };
+
+            const pollId = setInterval(async () => {
+              const done = await check();
+              if (done) clearInterval(pollId);
+              if (Date.now() - start > timeoutMs) {
+                clearInterval(pollId);
+                alertDiv.innerHTML = `<div class="alert error">⚠️ Order not filled within ${timeoutMs/1000}s. It may be pending.</div>`;
+                // still refresh portfolio and shareholders once
+                loadPortfolio();
+                try { loadHistory(); } catch(e) {}
+                try { loadShareholderStats(); } catch(e) {}
+              }
+            }, intervalMs);
           } else {
             alertDiv.innerHTML = `<div class="alert error">❌ ${
               data.message || "Order failed"
@@ -615,7 +687,11 @@
           if (response.ok) {
             alertDiv.innerHTML = `<div class="alert success">✅ Sell order placed! Order ID: ${data.orderId}</div>`;
             document.getElementById("sell-form").reset();
-            setTimeout(() => loadPortfolio(), 1000);
+            setTimeout(() => {
+              loadPortfolio();
+              try { loadHistory(); } catch(e) {}
+              try { loadShareholderStats(); } catch(e) {}
+            }, 1000);
           } else {
             alertDiv.innerHTML = `<div class="alert error">❌ ${
               data.message || "Order failed"
@@ -702,8 +778,72 @@
       function logout() {
         localStorage.removeItem("authToken");
         localStorage.removeItem("userId");
+        localStorage.removeItem("userName");
         window.location.href = "index-new.html";
       }
+
+      // ---------------- Available Stocks logic ----------------
+      async function fetchStocks(params = {}) {
+        const qs = new URLSearchParams();
+        Object.keys(params).forEach((k) => {
+          if (params[k] !== undefined && params[k] !== "") qs.append(k, params[k]);
+        });
+        const url = `${API_URL}/market/stocks?${qs.toString()}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`Status ${res.status}`);
+        return res.json();
+      }
+
+      async function renderStocksList(data) {
+        const stocks = data.stocks || [];
+        if (!stocks.length) {
+          document.getElementById("stocks-table").innerHTML = "<p>No stocks found</p>";
+          return;
+        }
+        let html = "<table><tr><th>Stock ID</th><th>Company</th><th>Price (₹)</th><th>Available Shares</th><th>Listed On</th></tr>";
+        stocks.forEach((s) => {
+          html += `<tr><td>${s.stock_id}</td><td>${s.company_name || ''}</td><td>₹${parseFloat(s.current_price).toFixed(2)}</td><td>${s.available_shares}</td><td>${s.listing_date || ''}</td></tr>`;
+        });
+        html += "</table>";
+        document.getElementById("stocks-table").innerHTML = html;
+      }
+
+      function getStockFiltersFromUI() {
+        const min_price = document.getElementById("min-price").value;
+        const max_price = document.getElementById("max-price").value;
+        const q = document.getElementById("stock-search").value;
+        const params = {};
+        if (min_price) params.min_price = min_price;
+        if (max_price) params.max_price = max_price;
+        if (q) params.q = q;
+        return params;
+      }
+
+      async function searchStocks() {
+        try {
+          const params = getStockFiltersFromUI();
+          const data = await fetchStocks(params);
+          await renderStocksList(data);
+        } catch (err) {
+          document.getElementById("stocks-alert").innerHTML = `<div class="alert error">❌ ${err.message}</div>`;
+        }
+      }
+
+      function resetStockFilters() {
+        document.getElementById("min-price").value = "";
+        document.getElementById("max-price").value = "";
+        document.getElementById("stock-search").value = "";
+        searchStocks();
+      }
+
+      // Load stocks when available-stocks tab is shown (or on first load)
+      document.addEventListener("DOMContentLoaded", () => {
+        // initial load of stocks so users see something
+        // but only if the available-stocks pane exists
+        if (document.getElementById('available-stocks')) {
+          searchStocks();
+        }
+      });
     </script>
   </body>
 </html>

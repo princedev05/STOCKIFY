@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Company Signup - Stockify</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body{font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;background:#f5f5f5}
+    .box{max-width:640px;margin:60px auto;background:#fff;padding:24px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+    label{display:block;margin-bottom:6px;font-weight:600}
+    input,textarea,select{width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;margin-bottom:12px}
+    .btn{background:#667eea;color:#fff;border:none;padding:10px 16px;border-radius:6px;cursor:pointer}
+    .muted{color:#666;font-size:0.9rem}
+    .alert{padding:12px;border-radius:6px;margin-bottom:12px}
+    .success{background:#e6ffed;border:1px solid #c7f0d1;color:#134b2c}
+    .error{background:#ffe6e9;border:1px solid #f1c0c7;color:#6b0f1a}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>Company Signup</h2>
+    <p class="muted">Create a company record and a user account for your company.</p>
+    <div id="message"></div>
+
+    <form id="companySignup">
+      <h3>Company Details</h3>
+      <label>Company Name *</label>
+      <input id="company_name" required />
+      <label>Sector</label>
+      <input id="sector" />
+      <label>Website</label>
+      <input id="website" />
+      <label>Description</label>
+      <textarea id="description"></textarea>
+
+      <h3 style="margin-top:12px">Admin User (you)</h3>
+      <label>Username *</label>
+      <input id="username" required />
+      <label>Full Name</label>
+      <input id="name" />
+      <label>Email *</label>
+      <input id="email" type="email" required />
+      <label>Password *</label>
+      <input id="password" type="password" required />
+
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn" type="submit">Create Company & Account</button>
+        <a href="company-login.html" style="align-self:center">Already have an account?</a>
+      </div>
+    </form>
+  </div>
+
+<script>
+  const API = 'http://localhost:4000';
+  const msg = document.getElementById('message');
+  document.getElementById('companySignup').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    msg.innerHTML='';
+    const company_name = document.getElementById('company_name').value.trim();
+    if(!company_name) return msg.innerHTML='<div class="alert error">Company name required</div>';
+    const sector = document.getElementById('sector').value.trim();
+    const website = document.getElementById('website').value.trim();
+    const description = document.getElementById('description').value.trim();
+
+    const username = document.getElementById('username').value.trim();
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    if(!username || !email || !password) return msg.innerHTML='<div class="alert error">Username, email and password required</div>';
+
+    try{
+      // 1) create company
+      const cRes = await fetch(`${API}/company/create`, { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ company_name, sector, website, description }) });
+      const cJson = await cRes.json();
+      if(!cRes.ok) return msg.innerHTML = `<div class="alert error">Company create failed: ${cJson.error||cJson.message}</div>`;
+      const company_id = cJson.company_id;
+
+      // 2) register user with returned company_id
+      const regRes = await fetch(`${API}/auth/register`, { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username, name, email, password, role: 'company', company_id }) });
+      const regJson = await regRes.json();
+      if(!regRes.ok) return msg.innerHTML = `<div class="alert error">Registration failed: ${regJson.error||regJson.message}</div>`;
+
+      // 3) auto-login and redirect to company dashboard
+      const loginRes = await fetch(`${API}/auth/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username, password }) });
+      const loginJson = await loginRes.json();
+      if(!loginRes.ok) return msg.innerHTML = `<div class="alert error">Created but login failed: ${loginJson.error||loginJson.message}</div>`;
+
+      localStorage.setItem('authToken', loginJson.token);
+      if(loginJson.user_id) localStorage.setItem('userId', String(loginJson.user_id));
+      if(loginJson.name) localStorage.setItem('userName', loginJson.name);
+      if(loginJson.role) localStorage.setItem('role', loginJson.role);
+      if(loginJson.company_id) localStorage.setItem('companyId', String(loginJson.company_id));
+
+      // redirect to company dashboard
+      window.location.href = 'company-dashboard.html';
+    }catch(err){
+      console.error(err);
+      msg.innerHTML = `<div class="alert error">${err.message}</div>`;
+    }
+  });
+</script>
+</body>
+</html>

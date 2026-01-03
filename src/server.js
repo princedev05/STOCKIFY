@@ -6,7 +6,8 @@ const migrate = require("./migrate");
 const matchingEngine = require("./matchingEngine");
 const db = require("./db");
 
-const PORT = process.env.PORT || 4000;
+// Prefer `APP_PORT` for the HTTP server to avoid collisions with DB `PORT` env.
+const PORT = parseInt(process.env.APP_PORT || process.env.PORT || '4000', 10);
 
 async function start() {
   // Check DB connectivity before running DB-dependent components

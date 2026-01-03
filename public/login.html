@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login - Stock Market Simulation</title>
+    <title>Login - Stockify</title>
     <style>
       * {
         margin: 0;
@@ -197,12 +197,14 @@
     <!-- Navbar -->
     <nav>
       <div class="nav-container">
-        <a href="/" class="nav-brand"> 📈 Stock Market Sim </a>
+        <a href="/" class="nav-brand"> 📈 Stockify </a>
         <ul class="nav-links">
           <li><a href="/">Home</a></li>
           <li><a href="about.html">About</a></li>
           <li><a href="blog.html">Blog</a></li>
-          <li><a href="list.html">List Stock</a></li>
+          <!-- Company links -->
+          <li><a href="company-signup.html">Company Signup</a></li>
+          <li><a href="company-login.html">Company Login</a></li>
           <li><a href="signup.html" class="btn-signup">Sign Up</a></li>
         </ul>
       </div>
@@ -269,13 +271,22 @@
             const data = await response.json();
 
             if (response.ok) {
-              // Save token to localStorage
+              // Save token and user info to localStorage (use server keys)
               localStorage.setItem("authToken", data.token);
-              localStorage.setItem("userId", data.userId);
-              alertDiv.innerHTML = `<div class="alert success">✅ Login successful! Redirecting to dashboard...</div>`;
+              if (data.user_id) localStorage.setItem("userId", String(data.user_id));
+              if (data.name) localStorage.setItem("userName", data.name);
+              if (data.role) localStorage.setItem("role", data.role);
+              if (data.company_id) localStorage.setItem("companyId", String(data.company_id));
+
+              alertDiv.innerHTML = `<div class="alert success">✅ Login successful! Redirecting...</div>`;
+              // Redirect based on company association/role
               setTimeout(() => {
-                window.location.href = "dashboard.html";
-              }, 1500);
+                if (data.company_id || data.role === 'company') {
+                  window.location.href = "company-dashboard.html";
+                } else {
+                  window.location.href = "dashboard.html";
+                }
+              }, 800);
             } else {
               alertDiv.innerHTML = `<div class="alert error">❌ ${
                 data.message || "Login failed"

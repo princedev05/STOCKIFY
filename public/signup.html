@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sign Up - Stock Market Simulation</title>
+    <title>Sign Up - Stockify</title>
+    <link rel="stylesheet" href="styles.css">
     <style>
       * {
         margin: 0;
@@ -203,12 +204,14 @@
     <!-- Navbar -->
     <nav>
       <div class="nav-container">
-        <a href="/" class="nav-brand"> 📈 Stock Market Sim </a>
+        <a href="/" class="nav-brand"> 📈 Stockify </a>
         <ul class="nav-links">
           <li><a href="/">Home</a></li>
           <li><a href="about.html">About</a></li>
           <li><a href="blog.html">Blog</a></li>
-          <li><a href="list.html">List Stock</a></li>
+          <!-- Company links -->
+          <li><a href="company-signup.html">Company Signup</a></li>
+          <li><a href="company-login.html">Company Login</a></li>
           <li>
             <a href="login.html" class="btn-login">Already have an account?</a>
           </li>
@@ -268,54 +271,9 @@
           </div>
 
           <div class="form-group">
-            <label for="role">Account Type</label>
-            <select id="role" name="role" required>
-              <option value="investor">Investor (Buy/Sell Stocks)</option>
-              <option value="company">Company (List Stocks)</option>
-            </select>
-          </div>
-
-          <!-- Company fields (shown only when role is 'company') -->
-          <div id="company-fields" style="display: none;">
-            <div class="form-group">
-              <label for="company_name">Company Name *</label>
-              <input
-                type="text"
-                id="company_name"
-                name="company_name"
-                placeholder="Your company name"
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="sector">Sector</label>
-              <input
-                type="text"
-                id="sector"
-                name="sector"
-                placeholder="e.g., Technology, Finance, Healthcare"
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="website">Website</label>
-              <input
-                type="text"
-                id="website"
-                name="website"
-                placeholder="https://yourcompany.com"
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="description">Description</label>
-              <input
-                type="text"
-                id="description"
-                name="description"
-                placeholder="Brief description of your company"
-              />
-            </div>
+            <label>Account Type</label>
+            <div style="padding:8px 12px;background:#f8f9fb;border:1px solid #eee;border-radius:6px;">Investor (default)</div>
+            <!-- role is enforced server-side; this page creates investor accounts only -->
           </div>
 
           <button type="submit" class="btn-submit">Sign Up</button>
@@ -330,20 +288,7 @@
     <script>
       const API_URL = "http://localhost:4000";
 
-      // Toggle company fields based on role selection
-      document.getElementById("role").addEventListener("change", (e) => {
-        const companyFields = document.getElementById("company-fields");
-        const companyNameInput = document.getElementById("company_name");
-        
-        if (e.target.value === "company") {
-          companyFields.style.display = "block";
-          companyNameInput.required = true;
-        } else {
-          companyFields.style.display = "none";
-          companyNameInput.required = false;
-          companyNameInput.value = "";
-        }
-      });
+      // Signup is for investors on this page; role is a hidden input with value 'investor'
 
       document
         .getElementById("signup-form")
@@ -354,36 +299,15 @@
           const name = document.getElementById("name").value;
           const email = document.getElementById("email").value;
           const password = document.getElementById("password").value;
-          const role = document.getElementById("role").value;
+          // role is enforced server-side (investor)
+          const role = 'investor';
           
           const alertDiv = document.getElementById("alert-message");
 
           // Prepare payload
-          const payload = { 
-            username, 
-            name, 
-            email, 
-            password, 
-            role 
-          };
+          const payload = { username, name, email, password };
 
-          // Add company fields if registering as company
-          if (role === "company") {
-            const company_name = document.getElementById("company_name").value;
-            const sector = document.getElementById("sector").value;
-            const website = document.getElementById("website").value;
-            const description = document.getElementById("description").value;
-
-            if (!company_name) {
-              alertDiv.innerHTML = `<div class="alert error">❌ Company name is required for company registration</div>`;
-              return;
-            }
-
-            payload.company_name = company_name;
-            payload.sector = sector || null;
-            payload.website = website || null;
-            payload.description = description || null;
-          }
+          // This signup flow creates investor accounts only; company signup uses a separate page
 
           try {
             const response = await fetch(`${API_URL}/auth/register`, {
@@ -395,10 +319,34 @@
             const data = await response.json();
 
             if (response.ok) {
-              alertDiv.innerHTML = `<div class="alert success">✅ Account created successfully! Redirecting to login...</div>`;
-              setTimeout(() => {
-                window.location.href = "login.html";
-              }, 2000);
+              alertDiv.innerHTML = `<div class="alert success">✅ Account created successfully! Logging in...</div>`;
+              // Auto-login after registration
+              try {
+                const loginRes = await fetch(`${API_URL}/auth/login`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ username, password })
+                });
+                const loginData = await loginRes.json();
+                if (loginRes.ok) {
+                  localStorage.setItem('authToken', loginData.token);
+                  if (loginData.user_id) localStorage.setItem('userId', String(loginData.user_id));
+                  if (loginData.name) localStorage.setItem('userName', loginData.name);
+                  if (loginData.role) localStorage.setItem('role', loginData.role);
+                  if (loginData.company_id) localStorage.setItem('companyId', String(loginData.company_id));
+                  // redirect
+                  if (loginData.company_id || loginData.role === 'company' || role === 'company') {
+                    window.location.href = 'company-dashboard.html';
+                  } else {
+                    window.location.href = 'dashboard.html';
+                  }
+                  return;
+                }
+              } catch (e) {
+                console.warn('Auto-login failed', e);
+              }
+              // fallback to login page
+              setTimeout(() => { window.location.href = "login.html"; }, 1200);
             } else {
               alertDiv.innerHTML = `<div class="alert error">❌ ${
                 data.error || data.message || "Registration failed"

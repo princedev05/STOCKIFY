@@ -63,9 +63,12 @@ router.get("/financials", verifyToken, async (req, res) => {
       [company_id]
     );
     
-    // Get shareholder count
+    // Get shareholder count from current holdings (distinct users holding company stocks)
     const shareholderRows = await db.query(
-      "SELECT COUNT(*) as count FROM shareholders WHERE company_id = ? AND status = 'active'",
+      `SELECT COUNT(DISTINCT h.user_id) AS count
+       FROM holdings h
+       JOIN stocks s ON h.stock_id = s.stock_id
+       WHERE s.company_id = ? AND h.total_quantity > 0`,
       [company_id]
     );
     
@@ -212,11 +215,25 @@ router.get("/shareholders", verifyToken, async (req, res) => {
     
     const company_id = userRows[0].company_id;
     
+    // Compute current shareholders from holdings for all stocks of this company
     const shareholders = await db.query(
-      "SELECT s.*, u.username, u.email FROM shareholders s LEFT JOIN users u ON s.user_id = u.user_id WHERE s.company_id = ? AND s.status = 'active' ORDER BY s.total_shares DESC",
-      [company_id]
+      `SELECT h.user_id,
+              u.username,
+              u.email,
+              SUM(h.total_quantity) AS total_shares,
+              ROUND(AVG(h.avg_buy_price),2) AS avg_buy_price,
+              -- ownership percentage relative to total company shares
+              CASE WHEN tot.total_company_shares > 0 THEN ROUND(SUM(h.total_quantity) / tot.total_company_shares * 100,4) ELSE 0 END AS ownership_percentage
+       FROM holdings h
+       JOIN stocks s ON h.stock_id = s.stock_id
+       LEFT JOIN users u ON h.user_id = u.user_id
+       CROSS JOIN (SELECT COALESCE(SUM(total_shares),0) AS total_company_shares FROM stocks WHERE company_id = ?) tot
+       WHERE s.company_id = ? AND h.total_quantity > 0
+       GROUP BY h.user_id, u.username, u.email, tot.total_company_shares
+       ORDER BY total_shares DESC`,
+      [company_id, company_id]
     );
-    
+
     res.json(shareholders);
   } catch (err) {
     console.error(err);
@@ -240,26 +257,38 @@ router.get("/shareholders/stats", verifyToken, async (req, res) => {
     
     const company_id = userRows[0].company_id;
     
-    // Get shareholder statistics
-    const stats = await db.query(
-      `SELECT 
-        COUNT(*) as total_shareholders,
-        SUM(total_shares) as total_shares_held,
-        AVG(ownership_percentage) as avg_ownership,
-        MAX(ownership_percentage) as max_ownership,
-        MIN(ownership_percentage) as min_ownership
-      FROM shareholders WHERE company_id = ? AND status = 'active'`,
+    // Compute shareholder statistics from holdings
+    const statsRows = await db.query(
+      `SELECT
+         COUNT(DISTINCT h.user_id) AS total_shareholders,
+         COALESCE(SUM(h.total_quantity),0) AS total_shares_held
+       FROM holdings h
+       JOIN stocks s ON h.stock_id = s.stock_id
+       WHERE s.company_id = ? AND h.total_quantity > 0`,
       [company_id]
     );
-    
-    // Get top shareholders
+
+    const totalCompanySharesRow = await db.query(
+      "SELECT COALESCE(SUM(total_shares),0) as total_company_shares FROM stocks WHERE company_id = ?",
+      [company_id]
+    );
+    const totalCompanyShares = totalCompanySharesRow[0].total_company_shares || 0;
+
+    // Top shareholders by aggregated holdings
     const topShareholders = await db.query(
-      "SELECT s.*, u.username FROM shareholders s LEFT JOIN users u ON s.user_id = u.user_id WHERE s.company_id = ? AND s.status = 'active' ORDER BY s.total_shares DESC LIMIT 10",
-      [company_id]
+      `SELECT h.user_id, u.username, SUM(h.total_quantity) AS total_shares,
+              CASE WHEN ? > 0 THEN ROUND(SUM(h.total_quantity)/? * 100,4) ELSE 0 END AS ownership_percentage
+       FROM holdings h
+       JOIN stocks s ON h.stock_id = s.stock_id
+       LEFT JOIN users u ON h.user_id = u.user_id
+       WHERE s.company_id = ? AND h.total_quantity > 0
+       GROUP BY h.user_id, u.username
+       ORDER BY total_shares DESC LIMIT 10`,
+      [totalCompanyShares, totalCompanyShares, company_id]
     );
-    
+
     res.json({
-      statistics: stats[0],
+      statistics: statsRows[0],
       top_shareholders: topShareholders
     });
   } catch (err) {
@@ -285,87 +314,24 @@ router.get("/shareholders/:shareholderId", verifyToken, async (req, res) => {
     
     const company_id = userRows[0].company_id;
     
-    const shareholder = await db.query(
-      "SELECT s.*, u.username, u.email FROM shareholders s LEFT JOIN users u ON s.user_id = u.user_id WHERE s.shareholder_id = ? AND s.company_id = ?",
-      [shareholderId, company_id]
+    // shareholderId here refers to user_id in holdings-derived view
+    const rows = await db.query(
+      `SELECT h.user_id, u.username, u.email, SUM(h.total_quantity) AS total_shares, ROUND(AVG(h.avg_buy_price),2) AS avg_buy_price
+       FROM holdings h
+       JOIN stocks s ON h.stock_id = s.stock_id
+       LEFT JOIN users u ON h.user_id = u.user_id
+       WHERE s.company_id = ? AND h.user_id = ?
+       GROUP BY h.user_id, u.username, u.email`,
+      [company_id, shareholderId]
     );
-    
-    if (!shareholder.length) {
-      return res.status(404).json({ error: "Shareholder not found" });
-    }
-    
-    res.json(shareholder[0]);
+    if (!rows.length) return res.status(404).json({ error: 'Shareholder not found for this company' });
+    res.json(rows[0]);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// ===== DIVIDEND MANAGEMENT =====
-
-// Create dividend
-router.post("/dividends", verifyToken, async (req, res) => {
-  try {
-    const { user_id } = req.user;
-    const { dividend_amount, dividend_date, record_date, payment_date } = req.body;
-    
-    if (!dividend_amount || !dividend_date || !record_date || !payment_date) {
-      return res.status(400).json({ error: "All dividend fields are required" });
-    }
-    
-    const userRows = await db.query(
-      "SELECT company_id FROM users WHERE user_id = ?",
-      [user_id]
-    );
-    
-    if (!userRows.length || !userRows[0].company_id) {
-      return res.status(403).json({ error: "User is not associated with a company" });
-    }
-    
-    const company_id = userRows[0].company_id;
-    
-    const result = await db.query(
-      "INSERT INTO dividends (company_id, dividend_amount, dividend_date, record_date, payment_date) VALUES (?, ?, ?, ?, ?)",
-      [company_id, dividend_amount, dividend_date, record_date, payment_date]
-    );
-    
-    res.json({
-      success: true,
-      dividend_id: result.insertId,
-      message: "Dividend created successfully"
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Get dividends
-router.get("/dividends", verifyToken, async (req, res) => {
-  try {
-    const { user_id } = req.user;
-    
-    const userRows = await db.query(
-      "SELECT company_id FROM users WHERE user_id = ?",
-      [user_id]
-    );
-    
-    if (!userRows.length || !userRows[0].company_id) {
-      return res.status(403).json({ error: "User is not associated with a company" });
-    }
-    
-    const company_id = userRows[0].company_id;
-    
-    const dividends = await db.query(
-      "SELECT * FROM dividends WHERE company_id = ? ORDER BY dividend_date DESC",
-      [company_id]
-    );
-    
-    res.json(dividends);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  }
-});
+// Dividends feature removed from company dashboard routes
 
 module.exports = router;

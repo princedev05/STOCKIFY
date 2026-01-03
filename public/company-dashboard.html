@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Company Dashboard - Stock Market Simulation</title>
+    <title>Company Dashboard - Stockify</title>
+    <link rel="stylesheet" href="styles.css">
     <style>
         * {
             margin: 0;
@@ -379,7 +380,7 @@
     <!-- Navigation -->
     <nav>
         <div class="nav-container">
-            <a href="/" class="nav-brand">📈 Stock Market Sim</a>
+            <a href="/" class="nav-brand">📈 Stockify</a>
             <ul class="nav-links">
                 <li id="companyName" style="color: white;"></li>
                 <li><button class="logout-btn" onclick="logout()">Logout</button></li>
@@ -401,8 +402,8 @@
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('financials')">📊 Financial Dashboard</button>
             <button class="tab-btn" onclick="switchTab('shareholders')">👥 Shareholders</button>
-            <button class="tab-btn" onclick="switchTab('news')">📰 News & Announcements</button>
-            <button class="tab-btn" onclick="switchTab('dividends')">💰 Dividends</button>
+            <!-- <button class="tab-btn" onclick="switchTab('news')">📰 News & Announcements</button> -->
+            <button class="tab-btn" onclick="switchTab('liststock')">➕ List Stock</button>
         </div>
 
         <!-- FINANCIAL DASHBOARD TAB -->
@@ -448,6 +449,39 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+
+        <!-- LIST STOCK TAB -->
+        <div id="liststock" class="tab-content">
+            <div class="form-section">
+                <h3>➕ List New Stock</h3>
+                <form id="listStockForm" onsubmit="submitListStock(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="lot_size">Lot Size</label>
+                            <input type="number" id="lot_size" name="lot_size" min="1" value="1" />
+                        </div>
+                        <div class="form-group">
+                            <label for="current_price">Price per Share (₹) *</label>
+                            <input type="number" id="current_price" name="current_price" step="0.01" required />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="total_shares">Total Shares *</label>
+                            <input type="number" id="total_shares" name="total_shares" min="1" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="available_shares">Available Shares *</label>
+                            <input type="number" id="available_shares" name="available_shares" min="1" required />
+                        </div>
+                    </div>
+                    <div style="margin-top:12px">
+                        <button type="submit" class="btn btn-primary">List Stock</button>
+                    </div>
+                </form>
+                <div id="listStockMessage" style="margin-top:12px"></div>
             </div>
         </div>
 
@@ -505,7 +539,7 @@
                         <select id="newsType">
                             <option value="announcement">Announcement</option>
                             <option value="financial">Financial</option>
-                            <option value="dividend">Dividend</option>
+                            <!-- dividend news type removed -->
                             <option value="event">Event</option>
                             <option value="other">Other</option>
                         </select>
@@ -527,68 +561,16 @@
             </div>
         </div>
 
-        <!-- DIVIDENDS TAB -->
-        <div id="dividends" class="tab-content">
-            <div class="form-section">
-                <h3>💰 Declare Dividend</h3>
-                <form id="dividendForm" onsubmit="submitDividend(event)">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="dividendAmount">Dividend Amount (per share) *</label>
-                            <input type="number" id="dividendAmount" required step="0.01" min="0" placeholder="Enter amount">
-                        </div>
-                        <div class="form-group">
-                            <label for="dividendDate">Dividend Announcement Date *</label>
-                            <input type="date" id="dividendDate" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="recordDate">Record Date *</label>
-                            <input type="date" id="recordDate" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="paymentDate">Payment Date *</label>
-                            <input type="date" id="paymentDate" required>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Declare Dividend</button>
-                </form>
-            </div>
-
-            <div id="dividendsLoading" class="loading">
-                <div class="spinner"></div>
-                Loading dividends...
-            </div>
-            <div id="dividendsContent" style="display: none;">
-                <div class="table-container">
-                    <h3 style="padding: 20px 25px; margin-bottom: 0;">Dividend History</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Amount (per share)</th>
-                                <th>Announcement Date</th>
-                                <th>Record Date</th>
-                                <th>Payment Date</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dividendsList">
-                            <tr><td colspan="5" style="text-align: center; color: #999;">No dividends</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+        <!-- Dividends feature removed -->
     </div>
 
     <script>
         const API_URL = "http://localhost:4000";
         let currentCompanyId = null;
 
-        // Get token from localStorage
+        // Get token from localStorage (use same key as login: authToken)
         function getToken() {
-            return localStorage.getItem('token');
+            return localStorage.getItem('authToken');
         }
 
         // Check authentication
@@ -620,7 +602,6 @@
                 loadFinancials();
                 loadShareholderStats();
                 loadNews();
-                loadDividends();
             } catch (err) {
                 console.error('Auth error:', err);
                 localStorage.removeItem('token');
@@ -792,42 +773,7 @@
             }
         }
 
-        // Load Dividends
-        async function loadDividends() {
-            const token = getToken();
-            try {
-                const response = await fetch(`${API_URL}/company-dashboard/dividends`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) throw new Error('Failed to load dividends');
-
-                const dividends = await response.json();
-                const tbody = document.getElementById('dividendsList');
-
-                if (dividends && dividends.length > 0) {
-                    tbody.innerHTML = dividends.map(div => `
-                        <tr>
-                            <td>₹${div.dividend_amount}</td>
-                            <td>${div.dividend_date}</td>
-                            <td>${div.record_date}</td>
-                            <td>${div.payment_date}</td>
-                            <td><span class="badge badge-${div.status === 'paid' ? 'active' : 'inactive'}">${div.status}</span></td>
-                        </tr>
-                    `).join('');
-                }
-
-                document.getElementById('dividendsLoading').style.display = 'none';
-                document.getElementById('dividendsContent').style.display = 'block';
-            } catch (err) {
-                console.error('Error loading dividends:', err);
-                showError('Failed to load dividends');
-            }
-        }
+        // Dividends feature removed
 
         // Submit News
         async function submitNews(event) {
@@ -881,38 +827,44 @@
             }
         }
 
-        // Submit Dividend
-        async function submitDividend(event) {
+        // Dividends feature removed
+
+        // Submit new stock listing (company only)
+        async function submitListStock(event) {
             event.preventDefault();
             const token = getToken();
+            if (!token) { showError('Not authenticated'); return; }
 
-            const dividendAmount = document.getElementById('dividendAmount').value;
-            const dividendDate = document.getElementById('dividendDate').value;
-            const recordDate = document.getElementById('recordDate').value;
-            const paymentDate = document.getElementById('paymentDate').value;
+            const lot_size = parseInt(document.getElementById('lot_size').value) || 1;
+            const current_price = parseFloat(document.getElementById('current_price').value);
+            const total_shares = parseInt(document.getElementById('total_shares').value);
+            const available_shares = parseInt(document.getElementById('available_shares').value);
+
+            const msgEl = document.getElementById('listStockMessage');
+            msgEl.innerHTML = '';
+
+            if (!current_price || !total_shares || !available_shares) {
+                msgEl.innerHTML = '<div class="alert error">Please fill all required fields</div>';
+                return;
+            }
 
             try {
-                const response = await fetch(`${API_URL}/company-dashboard/dividends`, {
+                const resp = await fetch(`${API_URL}/company/listStock`, {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        dividend_amount: dividendAmount,
-                        dividend_date: dividendDate,
-                        record_date: recordDate,
-                        payment_date: paymentDate
-                    })
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ lot_size, current_price, total_shares, available_shares })
                 });
-
-                if (!response.ok) throw new Error('Failed to declare dividend');
-
-                showSuccess('Dividend declared successfully!');
-                document.getElementById('dividendForm').reset();
-                loadDividends();
+                const data = await resp.json();
+                if (resp.ok) {
+                    msgEl.innerHTML = `<div class="alert success">✅ Stock listed successfully (ID: ${data.stock_id || data.stockId || ''})</div>`;
+                    // refresh financials/stocks
+                    setTimeout(()=> { loadFinancials(); switchTab('financials'); }, 700);
+                } else {
+                    msgEl.innerHTML = `<div class="alert error">❌ ${data.error || data.message || 'Failed to list stock'}</div>`;
+                }
             } catch (err) {
-                showError('Error declaring dividend: ' + err.message);
+                console.error('listStock failed', err);
+                msgEl.innerHTML = `<div class="alert error">❌ ${err.message}</div>`;
             }
         }
 
@@ -933,7 +885,10 @@
 
         // Logout
         function logout() {
-            localStorage.removeItem('token');
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userId');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('role');
             window.location.href = '/';
         }
 
